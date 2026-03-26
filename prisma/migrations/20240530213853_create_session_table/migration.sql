@@ -16,5 +16,5 @@ CREATE TABLE "Session" (
     "collaborator" BOOLEAN DEFAULT false,
     "emailVerified" BOOLEAN DEFAULT false,
     "refreshToken" TEXT,
-    "refreshTokenExpires" TIMESTAMP(3),
+    "refreshTokenExpires" TIMESTAMP(3)
 );
