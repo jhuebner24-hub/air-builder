@@ -525,54 +525,56 @@
     }
 
     function buildReview() {
-      const vehicleText = buildVehicleLabel() || "—";
+  const vehicleText = buildVehicleLabel() || "—";
 
-      const suspensionText = state.noSuspension
-        ? "No Suspension"
-        : [
-            state.frontSelected && currentFitment?.frontSku
-              ? (skuDetails[currentFitment.frontSku]?.title || currentFitment.frontSku)
-              : "",
-            state.rearSelected && currentFitment?.rearSku
-              ? (skuDetails[currentFitment.rearSku]?.title || currentFitment.rearSku)
-              : ""
-          ].filter(Boolean).join("<br>") || "None";
-
-      const managementText = state.noManagement
-        ? "No Management"
-        : (
-            state.managementSku && skuDetails[state.managementSku]
-              ? skuDetails[state.managementSku].title
-              : "None"
-          );
-
-      const tankText = state.noTank
-        ? "No Tank + Compressor"
-        : (
-            state.tankSku && skuDetails[state.tankSku]
-              ? skuDetails[state.tankSku].title
-              : "None"
-          );
-
-      const addonsText = state.addons.length
-        ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>")
-        : "No Add-Ons";
-
-      if (reviewVehicleEl) reviewVehicleEl.innerHTML = vehicleText;
-      if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = suspensionText;
-      if (reviewManagementEl) reviewManagementEl.innerHTML = managementText;
-      if (reviewTankEl) reviewTankEl.innerHTML = tankText;
-      if (reviewAddonsEl) reviewAddonsEl.innerHTML = addonsText;
-
-      if (mobileVehicleEl) mobileVehicleEl.textContent = vehicleText;
-      if (mobileSuspensionEl) mobileSuspensionEl.textContent = suspensionText.replace(/<br>/g, ", ");
-      if (mobileManagementEl) mobileManagementEl.textContent = managementText;
-      if (mobileTankEl) mobileTankEl.textContent = tankText;
-      if (mobileAddonsEl) mobileAddonsEl.textContent = addonsText.replace(/<br>/g, ", ");
-      if (mobileTotalEl) mobileTotalEl.textContent = moneyFormat(getEstimatedTotal());
-
-      updateSummary();
+  const suspensionItems = [];
+  if (state.noSuspension) {
+    suspensionItems.push("No Suspension");
+  } else if (currentFitment) {
+    if (state.frontSelected && currentFitment.frontSku) {
+      suspensionItems.push(skuDetails[currentFitment.frontSku]?.title || currentFitment.frontSku);
     }
+    if (state.rearSelected && currentFitment.rearSku) {
+      suspensionItems.push(skuDetails[currentFitment.rearSku]?.title || currentFitment.rearSku);
+    }
+  }
+
+  const suspensionText = suspensionItems.length ? suspensionItems.join("<br>") : "None";
+
+  const managementText = state.noManagement
+    ? "No Management"
+    : (state.managementSku
+        ? (skuDetails[state.managementSku]?.title || state.managementSku)
+        : "None");
+
+  const tankText = state.noTank
+    ? "No Tank + Compressor"
+    : (state.tankSku
+        ? (skuDetails[state.tankSku]?.title || state.tankSku)
+        : "None");
+
+  const addonsText = state.addons.length
+    ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>")
+    : "No Add-Ons";
+
+  if (reviewVehicleEl) reviewVehicleEl.innerHTML = vehicleText;
+  if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = suspensionText;
+  if (reviewManagementEl) reviewManagementEl.innerHTML = managementText;
+  if (reviewTankEl) reviewTankEl.innerHTML = tankText;
+  if (reviewAddonsEl) reviewAddonsEl.innerHTML = addonsText;
+
+  if (mobileVehicleEl) mobileVehicleEl.textContent = vehicleText;
+  if (mobileSuspensionEl) mobileSuspensionEl.textContent = suspensionItems.length ? suspensionItems.join(", ") : "None";
+  if (mobileManagementEl) mobileManagementEl.textContent = managementText;
+  if (mobileTankEl) mobileTankEl.textContent = tankText;
+  if (mobileAddonsEl) mobileAddonsEl.textContent = state.addons.length
+    ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join(", ")
+    : "No Add-Ons";
+  if (mobileTotalEl) mobileTotalEl.textContent = moneyFormat(getEstimatedTotal());
+
+  updateSummary();
+}
+
 
     function bindSuspensionCards() {
       const kitCards = kitGridEl.querySelectorAll('.ab-card[data-type="kit"]');
@@ -1069,14 +1071,18 @@
     };
 
     document.getElementById("air-to-review").onclick = function () {
-      try {
-        buildReview();
-        showSlide("review");
-      } catch (error) {
-        console.error("Review step error:", error);
-        fitmentResultEl.innerHTML = "There was a problem loading the review step.";
-      }
-    };
+  try {
+    buildReview();
+    showSlide("review");
+
+    setTimeout(() => {
+      buildReview();
+    }, 50);
+  } catch (error) {
+    console.error("Review step error:", error);
+    fitmentResultEl.innerHTML = "There was a problem loading the review step.";
+  }
+};
 
     document.getElementById("air-back-to-addons").onclick = function () {
       showSlide("addons");
