@@ -290,13 +290,35 @@
       });
     }
 
+    function scrollToActiveSlideTop(name) {
+      const slide = slides[name];
+      if (!slide) return;
+
+      const isMobile = window.innerWidth <= 768;
+      if (!isMobile) return;
+
+      requestAnimationFrame(() => {
+        const rect = slide.getBoundingClientRect();
+        const absoluteTop = window.pageYOffset + rect.top;
+        const offset = 16;
+
+        window.scrollTo({
+          top: Math.max(absoluteTop - offset, 0),
+          behavior: "smooth"
+        });
+      });
+    }
+
     function showSlide(name) {
       Object.values(slides).forEach((slide) => {
         if (slide) slide.classList.remove("is-active");
       });
+
       if (slides[name]) slides[name].classList.add("is-active");
+
       buildProgress(name === "review" ? "addons" : name);
       clearInlineErrors();
+      scrollToActiveSlideTop(name);
     }
 
     function buildProductCard(product, type) {
@@ -518,15 +540,19 @@
 
       const managementText = state.noManagement
         ? "No Management"
-        : (state.managementSku && skuDetails[state.managementSku]
-            ? skuDetails[state.managementSku].title
-            : "None");
+        : (
+            state.managementSku && skuDetails[state.managementSku]
+              ? skuDetails[state.managementSku].title
+              : "None"
+          );
 
       const tankText = state.noTank
         ? "No Tank + Compressor"
-        : (state.tankSku && skuDetails[state.tankSku]
-            ? skuDetails[state.tankSku].title
-            : "None");
+        : (
+            state.tankSku && skuDetails[state.tankSku]
+              ? skuDetails[state.tankSku].title
+              : "None"
+          );
 
       const addonsText = state.addons.length
         ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>")

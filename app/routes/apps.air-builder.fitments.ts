@@ -148,17 +148,18 @@ export async function loader({ request }: any) {
       );
 
     if (mode === "list") {
-      return jsonResponse({
-        fitments: fitments.map((f) => ({
-          yearStart: f.yearStart,
-          yearEnd: f.yearEnd,
-          make: f.make,
-          model: f.model,
-          drive: f.drivetrain,
-        })),
-        settings,
-      });
-    }
+  return data({
+    fitments: fitments.map((f) => ({
+      yearStart: f.yearStart,
+      yearEnd: f.yearEnd,
+      make: f.make,
+      model: f.model,
+      drive: f.drivetrain || "",
+    })),
+    settings,
+  });
+}
+
 
     const year = Number(url.searchParams.get("year") || "");
     const make = url.searchParams.get("make") || "";
