@@ -1132,4 +1132,9 @@
   } else {
     initAirBuilder();
   }
+
+document.addEventListener("DOMContentLoaded", function () {
+  initAirBuilder();
+});
+  
 })();
