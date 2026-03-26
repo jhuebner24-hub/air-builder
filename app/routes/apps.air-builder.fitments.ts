@@ -1,4 +1,3 @@
-import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 
 type FitmentRecord = {
@@ -30,6 +29,16 @@ function fieldsToObject(fields: Array<{ key: string; value: string | null }>) {
     acc[field.key] = field.value || "";
     return acc;
   }, {});
+}
+
+function jsonResponse(payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
 }
 
 export async function loader({ request }: any) {
@@ -111,7 +120,7 @@ export async function loader({ request }: any) {
       );
 
     if (mode === "list") {
-      return json({
+      return jsonResponse({
         fitment: null,
         fitments: fitments.map((f) => ({
           yearStart: f.yearStart,
@@ -130,7 +139,7 @@ export async function loader({ request }: any) {
     const drivetrain = url.searchParams.get("drivetrain") || "";
 
     if (!year || !make || !model || !drivetrain) {
-      return json({ fitment: null, settings });
+      return jsonResponse({ fitment: null, settings });
     }
 
     const match = fitments.find((f) => {
@@ -144,10 +153,10 @@ export async function loader({ request }: any) {
     });
 
     if (!match) {
-      return json({ fitment: null, settings });
+      return jsonResponse({ fitment: null, settings });
     }
 
-    return json({
+    return jsonResponse({
       fitment: {
         frontSku: match.frontSku,
         rearSku: match.rearSku,
@@ -160,7 +169,7 @@ export async function loader({ request }: any) {
   } catch (error: any) {
     console.error("apps.air-builder.fitments.ts error:", error);
 
-    return json({
+    return jsonResponse({
       fitment: null,
       fitments: [],
       settings: {
