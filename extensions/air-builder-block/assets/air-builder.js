@@ -406,6 +406,26 @@
       return enriched;
     }
 
+    async function preloadSuspensionProducts(skus) {
+      if (!skus.length) return;
+
+      const res = await fetch("/apps/air-builder/products?skus=" + encodeURIComponent(skus.join(",")));
+      const rawText = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (e) {
+        throw new Error("Suspension products route did not return valid JSON");
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Suspension products request failed");
+      }
+
+      await enrichProducts(data.products || []);
+    }
+
     async function preloadAllProducts() {
       const allSkus = uniq([
         currentFitment?.frontSku,
@@ -525,56 +545,54 @@
     }
 
     function buildReview() {
-  const vehicleText = buildVehicleLabel() || "—";
+      const vehicleText = buildVehicleLabel() || "—";
 
-  const suspensionItems = [];
-  if (state.noSuspension) {
-    suspensionItems.push("No Suspension");
-  } else if (currentFitment) {
-    if (state.frontSelected && currentFitment.frontSku) {
-      suspensionItems.push(skuDetails[currentFitment.frontSku]?.title || currentFitment.frontSku);
+      const suspensionText = state.noSuspension
+        ? "No Suspension"
+        : [
+            state.frontSelected && currentFitment?.frontSku
+              ? (skuDetails[currentFitment.frontSku]?.title || currentFitment.frontSku)
+              : "",
+            state.rearSelected && currentFitment?.rearSku
+              ? (skuDetails[currentFitment.rearSku]?.title || currentFitment.rearSku)
+              : ""
+          ].filter(Boolean).join("<br>") || "None";
+
+      const managementText = state.noManagement
+        ? "No Management"
+        : (
+            state.managementSku && skuDetails[state.managementSku]
+              ? skuDetails[state.managementSku].title
+              : "None"
+          );
+
+      const tankText = state.noTank
+        ? "No Tank + Compressor"
+        : (
+            state.tankSku && skuDetails[state.tankSku]
+              ? skuDetails[state.tankSku].title
+              : "None"
+          );
+
+      const addonsText = state.addons.length
+        ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>")
+        : "No Add-Ons";
+
+      if (reviewVehicleEl) reviewVehicleEl.innerHTML = vehicleText;
+      if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = suspensionText;
+      if (reviewManagementEl) reviewManagementEl.innerHTML = managementText;
+      if (reviewTankEl) reviewTankEl.innerHTML = tankText;
+      if (reviewAddonsEl) reviewAddonsEl.innerHTML = addonsText;
+
+      if (mobileVehicleEl) mobileVehicleEl.textContent = vehicleText;
+      if (mobileSuspensionEl) mobileSuspensionEl.textContent = suspensionText.replace(/<br>/g, ", ");
+      if (mobileManagementEl) mobileManagementEl.textContent = managementText;
+      if (mobileTankEl) mobileTankEl.textContent = tankText;
+      if (mobileAddonsEl) mobileAddonsEl.textContent = addonsText.replace(/<br>/g, ", ");
+      if (mobileTotalEl) mobileTotalEl.textContent = moneyFormat(getEstimatedTotal());
+
+      updateSummary();
     }
-    if (state.rearSelected && currentFitment.rearSku) {
-      suspensionItems.push(skuDetails[currentFitment.rearSku]?.title || currentFitment.rearSku);
-    }
-  }
-
-  const suspensionText = suspensionItems.length ? suspensionItems.join("<br>") : "None";
-
-  const managementText = state.noManagement
-    ? "No Management"
-    : (state.managementSku
-        ? (skuDetails[state.managementSku]?.title || state.managementSku)
-        : "None");
-
-  const tankText = state.noTank
-    ? "No Tank + Compressor"
-    : (state.tankSku
-        ? (skuDetails[state.tankSku]?.title || state.tankSku)
-        : "None");
-
-  const addonsText = state.addons.length
-    ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>")
-    : "No Add-Ons";
-
-  if (reviewVehicleEl) reviewVehicleEl.innerHTML = vehicleText;
-  if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = suspensionText;
-  if (reviewManagementEl) reviewManagementEl.innerHTML = managementText;
-  if (reviewTankEl) reviewTankEl.innerHTML = tankText;
-  if (reviewAddonsEl) reviewAddonsEl.innerHTML = addonsText;
-
-  if (mobileVehicleEl) mobileVehicleEl.textContent = vehicleText;
-  if (mobileSuspensionEl) mobileSuspensionEl.textContent = suspensionItems.length ? suspensionItems.join(", ") : "None";
-  if (mobileManagementEl) mobileManagementEl.textContent = managementText;
-  if (mobileTankEl) mobileTankEl.textContent = tankText;
-  if (mobileAddonsEl) mobileAddonsEl.textContent = state.addons.length
-    ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join(", ")
-    : "No Add-Ons";
-  if (mobileTotalEl) mobileTotalEl.textContent = moneyFormat(getEstimatedTotal());
-
-  updateSummary();
-}
-
 
     function bindSuspensionCards() {
       const kitCards = kitGridEl.querySelectorAll('.ab-card[data-type="kit"]');
@@ -965,8 +983,7 @@
             throw new Error("Fitment found, but no suspension SKUs are attached.");
           }
 
-          preloadPromise = ensurePreloaded();
-          await preloadPromise;
+          await preloadSuspensionProducts(suspensionSkus);
 
           renderProductsFromCache(suspensionSkus, kitGridEl, "kit");
           kitGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Suspension", "Skip front and rear suspension.", "no-suspension"));
@@ -979,6 +996,10 @@
           summaryShellEl.style.display = "block";
           fitmentResultEl.innerHTML = "";
           showSlide("suspension");
+
+          preloadPromise = preloadAllProducts().catch((error) => {
+            console.error("Background preload error:", error);
+          });
         } finally {
           btn.disabled = false;
           btn.innerHTML = oldText;
@@ -1050,14 +1071,14 @@
     };
 
     document.getElementById("air-to-review").onclick = function () {
-  try {
-    buildReview();
-    showSlide("review");
-  } catch (error) {
-    console.error("Review step error:", error);
-    fitmentResultEl.innerHTML = "There was a problem loading the review step.";
-  }
-};
+      try {
+        buildReview();
+        showSlide("review");
+      } catch (error) {
+        console.error("Review step error:", error);
+        fitmentResultEl.innerHTML = "There was a problem loading the review step.";
+      }
+    };
 
     document.getElementById("air-back-to-addons").onclick = function () {
       showSlide("addons");
@@ -1098,9 +1119,4 @@
   } else {
     initAirBuilder();
   }
-
-document.addEventListener("DOMContentLoaded", function () {
-  initAirBuilder();
-});
-  
 })();
