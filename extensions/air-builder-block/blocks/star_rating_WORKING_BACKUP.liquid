@@ -1,0 +1,1426 @@
+<div id="air-builder">
+  <style>
+    #air-builder {
+      --ab-bg: #06080c;
+      --ab-bg-2: #0b1017;
+      --ab-panel: rgba(16, 22, 31, 0.78);
+      --ab-border: rgba(255,255,255,.10);
+      --ab-border-strong: rgba(255,255,255,.18);
+      --ab-text: #f5f7fb;
+      --ab-muted: #aeb8c7;
+      --ab-soft: #dde5ef;
+      --ab-success-bg: rgba(76,175,80,.14);
+      --ab-success-border: rgba(76,175,80,.30);
+      --ab-success-text: #d1f0d4;
+      --ab-warning-bg: rgba(255,193,7,.12);
+      --ab-warning-border: rgba(255,193,7,.28);
+      --ab-warning-text: #ffe8a1;
+      --ab-shadow: 0 30px 80px rgba(0,0,0,.35);
+      --ab-card-shadow: 0 12px 28px rgba(0,0,0,.20);
+      width: min(1680px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 28px 0;
+      color: var(--ab-text);
+      font: inherit;
+    }
+
+    #air-builder * { box-sizing: border-box; }
+    #air-builder .ab-header { text-align: center; margin-bottom: 20px; }
+    #air-builder h2 { margin: 0 0 10px; font-size: clamp(30px, 4vw, 56px); line-height: 1; letter-spacing: -0.03em; color: var(--ab-text); }
+    #air-builder .ab-sub { margin: 0; color: var(--ab-muted); font-size: 16px; }
+
+    #air-builder .ab-wrap {
+      width: 100%;
+      padding: 24px;
+      border-radius: 30px;
+      border: 1px solid var(--ab-border);
+      background:
+        radial-gradient(circle at top center, rgba(255,255,255,.05), transparent 35%),
+        linear-gradient(135deg, rgba(5,8,12,.96), rgba(12,18,28,.94));
+      box-shadow: var(--ab-shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+
+    #air-builder .ab-glass {
+      border-radius: 24px;
+      border: 1px solid var(--ab-border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    #air-builder .ab-vehicle { padding: 22px; margin-bottom: 0; }
+    #air-builder .ab-vehicle-title { font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 16px; }
+
+    #air-builder .ab-top-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      align-items: end;
+    }
+
+    #air-builder .ab-field-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: #d1d9e6;
+      margin-bottom: 8px;
+    }
+
+    #air-builder select {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.96);
+      color: #141923;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      appearance: none;
+    }
+
+    #air-builder select:disabled {
+      background: rgba(255,255,255,.65);
+      color: #323743;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+
+    #air-builder .ab-check-btn,
+    #air-builder .ab-btn {
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    #air-builder .ab-check-btn {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(180deg, #ffffff, #e9eef7);
+      color: #121722;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+    }
+
+    #air-builder .ab-check-btn:hover,
+    #air-builder .ab-btn:hover { transform: translateY(-2px); }
+
+    #air-builder .ab-status {
+      margin-top: 14px;
+      min-height: 20px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--ab-text);
+    }
+
+    #air-builder .ab-inline-error {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--ab-warning-bg);
+      border: 1px solid var(--ab-warning-border);
+      color: var(--ab-warning-text);
+      font-weight: 700;
+      display: none;
+    }
+
+    #air-builder .ab-builder-area { display: none; margin-top: 18px; }
+
+    #air-builder .ab-progress {
+      display: none;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+
+    #air-builder .ab-step {
+      min-height: 72px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--ab-border);
+      background: rgba(255,255,255,.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: .16s ease;
+    }
+
+    #air-builder .ab-step:hover {
+      transform: translateY(-1px);
+      border-color: var(--ab-border-strong);
+      background: rgba(255,255,255,.06);
+    }
+
+    #air-builder .ab-step-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--ab-muted);
+      font-weight: 700;
+    }
+
+    #air-builder .ab-step-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ab-text);
+      line-height: 1.2;
+    }
+
+    #air-builder .ab-step.is-current {
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    #air-builder .ab-step.is-complete {
+      background: var(--ab-success-bg);
+      border-color: var(--ab-success-border);
+    }
+
+    #air-builder .ab-step.is-complete .ab-step-kicker,
+    #air-builder .ab-step.is-complete .ab-step-label {
+      color: var(--ab-success-text);
+    }
+
+    #air-builder .ab-mobile-step {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--ab-border);
+      background: rgba(255,255,255,.05);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ab-soft);
+      text-align: center;
+    }
+
+    #air-builder .ab-summary-shell { margin: 0 0 14px; display: none; }
+
+    #air-builder .ab-summary-bar {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 22px;
+      border: 1px solid var(--ab-border);
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    #air-builder .ab-summary-item { min-width: 0; }
+    #air-builder .ab-summary-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ab-muted); font-weight: 700; margin-bottom: 4px; }
+    #air-builder .ab-summary-value { font-size: 13px; font-weight: 700; color: var(--ab-soft); line-height: 1.3; word-break: break-word; }
+
+    #air-builder .ab-summary-total {
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(255,255,255,.08);
+    }
+
+    #air-builder .ab-summary-total .ab-summary-value { font-size: 20px; font-weight: 800; color: #fff; }
+
+    #air-builder .ab-slide {
+      min-height: 420px;
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .25s ease, transform .25s ease;
+      padding: 20px;
+    }
+
+    #air-builder .ab-slide.is-active { display: block; opacity: 1; transform: translateY(0); }
+    #air-builder .ab-slide-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; text-align: center; }
+    #air-builder .ab-slide-sub { color: var(--ab-muted); margin-bottom: 14px; font-size: 14px; text-align: center; }
+
+    #air-builder .ab-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    #air-builder .ab-grid.ab-grid--3 {
+      grid-template-columns: repeat(3, minmax(0, 250px));
+      justify-content: center;
+    }
+
+    /* CARD SIZE LOCK */
+    #air-builder .ab-card {
+      border-radius: 18px;
+      border: 1px solid var(--ab-border);
+      padding: 12px;
+      cursor: pointer;
+      height: 100%;
+      min-height: 335px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow: var(--ab-card-shadow);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    #air-builder .ab-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 18px 40px rgba(0,0,0,.24);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+    }
+
+    #air-builder .ab-card.is-selected {
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(234,240,248,.96));
+      color: #111827;
+      border-color: rgba(255,255,255,.95);
+      box-shadow: 0 20px 42px rgba(255,255,255,.08);
+    }
+
+    #air-builder .ab-card.is-selected .ab-meta,
+    #air-builder .ab-card.is-selected .ab-note { color: #4c5562; }
+
+    /* SAME IMAGE BOX EVERYWHERE */
+    #air-builder .ab-img-wrap {
+      aspect-ratio: 1 / 1;
+      min-height: 180px;
+      max-height: 180px;
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    #air-builder .ab-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #ffffff;
+    }
+
+    #air-builder .ab-meta {
+      font-size: 11px;
+      color: var(--ab-muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      min-height: 16px;
+    }
+
+    #air-builder .ab-title {
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      min-height: 48px;
+    }
+
+    #air-builder .ab-note {
+      font-size: 12px;
+      color: var(--ab-muted);
+      margin-top: 4px;
+      min-height: 32px;
+    }
+
+    #air-builder .ab-price {
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: auto;
+      min-height: 20px;
+    }
+
+    #air-builder .ab-summary-line { margin-top: 10px; min-height: 18px; text-align: center; font-weight: 700; color: var(--ab-soft); }
+
+    #air-builder .ab-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; }
+    #air-builder .ab-btn { min-height: 46px; padding: 0 16px; border-radius: 14px; font: inherit; font-weight: 800; cursor: pointer; }
+    #air-builder .ab-btn-primary { background: linear-gradient(180deg, #ffffff, #e9eef7); color: #111827; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 12px 26px rgba(0,0,0,.14); }
+    #air-builder .ab-btn-secondary { background: rgba(255,255,255,.04); color: #fff; border: 1px solid var(--ab-border); }
+
+    #air-builder .ab-review { background: rgba(255,255,255,.035); border: 1px solid var(--ab-border); border-radius: 18px; padding: 18px; }
+    #air-builder .ab-review-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--ab-border); }
+    #air-builder .ab-review-row:last-child { border-bottom: 0; }
+    #air-builder .ab-review-label { font-weight: 800; }
+    #air-builder .ab-review-value { text-align: right; color: var(--ab-soft); }
+    #air-builder .ab-review-mobile-hide { display: block; }
+
+    #air-builder .ab-mobile-summary {
+      display: none;
+      margin-top: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--ab-border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    #air-builder .ab-mobile-summary-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; }
+    #air-builder .ab-mobile-summary-row { padding: 8px 0; border-bottom: 1px solid var(--ab-border); }
+    #air-builder .ab-mobile-summary-row:last-child { border-bottom: 0; }
+    #air-builder .ab-mobile-summary-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ab-muted); font-weight: 700; margin-bottom: 3px; }
+    #air-builder .ab-mobile-summary-value { font-size: 14px; font-weight: 700; color: var(--ab-soft); line-height: 1.4; }
+    #air-builder .ab-cart-price { margin-left: 6px; font-weight: 800; }
+
+    @media (max-width: 1250px) {
+      #air-builder .ab-summary-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 1100px) {
+      #air-builder .ab-grid { grid-template-columns: repeat(3, 1fr); }
+      #air-builder .ab-grid.ab-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      #air-builder .ab-top-grid { grid-template-columns: repeat(2, 1fr); }
+      #air-builder .ab-progress { grid-template-columns: repeat(2, 1fr); }
+      #air-builder .ab-summary-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      #air-builder .ab-grid,
+      #air-builder .ab-grid.ab-grid--3 { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      #air-builder { width: calc(100vw - 24px); padding: 18px 0; }
+      #air-builder .ab-wrap,
+      #air-builder .ab-vehicle,
+      #air-builder .ab-slide,
+      #air-builder .ab-mobile-summary { padding: 16px; }
+      #air-builder .ab-top-grid { grid-template-columns: 1fr; }
+      #air-builder .ab-progress { display: none !important; }
+      #air-builder .ab-mobile-step { display: block; }
+      #air-builder .ab-summary-shell { display: none !important; }
+      #air-builder .ab-builder-area { margin-top: 14px; }
+      #air-builder .ab-slide { min-height: auto; }
+      #air-builder .ab-grid,
+      #air-builder .ab-grid.ab-grid--3 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      #air-builder .ab-actions { flex-direction: column-reverse; }
+      #air-builder .ab-btn,
+      #air-builder .ab-check-btn { width: 100%; }
+      #air-builder .ab-review-mobile-hide { display: none; }
+      #air-builder .ab-mobile-summary { display: block; }
+      #air-builder .ab-review-row { flex-direction: column; gap: 6px; }
+      #air-builder .ab-review-value { text-align: left; }
+      #air-builder .ab-card { min-height: 300px; }
+      #air-builder .ab-img-wrap { min-height: 145px; max-height: 145px; }
+      #air-builder .ab-title { min-height: 40px; }
+    }
+  </style>
+
+
+  <div class="ab-wrap">
+    <div class="ab-glass ab-vehicle">
+      <div class="ab-vehicle-title">Select Your Vehicle</div>
+
+      <div class="ab-top-grid">
+        <div>
+          <div class="ab-field-label">Year</div>
+          <select id="air-year"><option value="">Select Year</option></select>
+        </div>
+        <div>
+          <div class="ab-field-label">Make</div>
+          <select id="air-make" disabled><option value="">Select Make</option></select>
+        </div>
+        <div>
+          <div class="ab-field-label">Model</div>
+          <select id="air-model" disabled><option value="">Select Model</option></select>
+        </div>
+        <div>
+          <div class="ab-field-label">Drivetrain</div>
+          <select id="air-drive" disabled><option value="">Select Drivetrain</option></select>
+        </div>
+        <div>
+          <div class="ab-field-label">&nbsp;</div>
+          <button id="air-check-fitment" type="button" class="ab-check-btn">Build My Kit</button>
+        </div>
+      </div>
+
+      <div id="air-fitment-result" class="ab-status"></div>
+    </div>
+
+    <div id="air-builder-area" class="ab-builder-area">
+      <div id="air-progress" class="ab-progress">
+        <div class="ab-step" data-step="suspension"><div class="ab-step-kicker">Step 1</div><div class="ab-step-label">Suspension</div></div>
+        <div class="ab-step" data-step="management"><div class="ab-step-kicker">Step 2</div><div class="ab-step-label">Management</div></div>
+        <div class="ab-step" data-step="tank"><div class="ab-step-kicker">Step 3</div><div class="ab-step-label">Tank + Compressor</div></div>
+        <div class="ab-step" data-step="addons"><div class="ab-step-kicker">Step 4</div><div class="ab-step-label">Add-Ons + Review</div></div>
+      </div>
+
+      <div id="air-summary-shell" class="ab-summary-shell">
+        <div class="ab-summary-bar">
+          <div class="ab-summary-item"><div class="ab-summary-label">Vehicle</div><div id="air-side-vehicle" class="ab-summary-value">Not selected</div></div>
+          <div class="ab-summary-item"><div class="ab-summary-label">Suspension</div><div id="air-side-suspension" class="ab-summary-value">Not selected</div></div>
+          <div class="ab-summary-item"><div class="ab-summary-label">Management</div><div id="air-side-management" class="ab-summary-value">Not selected</div></div>
+          <div class="ab-summary-item"><div class="ab-summary-label">Tank + Compressor</div><div id="air-side-tank" class="ab-summary-value">Not selected</div></div>
+          <div class="ab-summary-item"><div class="ab-summary-label">Add-Ons</div><div id="air-side-addons" class="ab-summary-value">None</div></div>
+          <div class="ab-summary-total"><div class="ab-summary-label">Kit Total</div><div id="air-side-total" class="ab-summary-value">$0.00</div></div>
+        </div>
+      </div>
+
+      <div id="air-slide-suspension" class="ab-glass ab-slide">
+        <div class="ab-mobile-step">Step 1 of 4 • Suspension</div>
+        <div class="ab-slide-title">Choose Suspension</div>
+        <div class="ab-slide-sub">Select front, rear, both, or no suspension.</div>
+        <div id="air-slide-error-suspension" class="ab-inline-error"></div>
+        <div id="air-kit-grid" class="ab-grid"></div>
+        <div id="air-suspension-summary" class="ab-summary-line"></div>
+        <div class="ab-actions" style="justify-content:flex-end;"><button id="air-to-management" type="button" class="ab-btn ab-btn-primary">Continue to Management</button></div>
+      </div>
+
+      <div id="air-slide-management" class="ab-glass ab-slide">
+        <div class="ab-mobile-step">Step 2 of 4 • Management</div>
+        <div class="ab-slide-title">Select Management</div>
+        <div class="ab-slide-sub">Choose a management system or continue without one.</div>
+        <div id="air-slide-error-management" class="ab-inline-error"></div>
+        <div id="air-management-grid" class="ab-grid"></div>
+        <div id="air-management-summary" class="ab-summary-line"></div>
+        <div class="ab-actions">
+          <button id="air-back-to-suspension" type="button" class="ab-btn ab-btn-secondary">Back</button>
+          <button id="air-to-tank" type="button" class="ab-btn ab-btn-primary">Continue to Tank + Compressor</button>
+        </div>
+      </div>
+
+      <div id="air-slide-tank" class="ab-glass ab-slide">
+        <div class="ab-mobile-step">Step 3 of 4 • Tank + Compressor</div>
+        <div class="ab-slide-title">Select Tank + Compressor</div>
+        <div class="ab-slide-sub">Choose the setup you want to pair with your build, or continue without one.</div>
+        <div id="air-slide-error-tank" class="ab-inline-error"></div>
+        <div id="air-tank-grid" class="ab-grid"></div>
+        <div id="air-tank-summary" class="ab-summary-line"></div>
+        <div class="ab-actions">
+          <button id="air-back-to-management" type="button" class="ab-btn ab-btn-secondary">Back</button>
+          <button id="air-to-addons" type="button" class="ab-btn ab-btn-primary">Continue to Add-Ons</button>
+        </div>
+      </div>
+
+      <div id="air-slide-addons" class="ab-glass ab-slide">
+        <div class="ab-mobile-step">Step 4 of 4 • Add-Ons + Review</div>
+        <div class="ab-slide-title">Add Optional Upgrades</div>
+        <div class="ab-slide-sub">Select any add-ons you want, then review the build.</div>
+        <div id="air-addon-grid" class="ab-grid"></div>
+        <div id="air-addon-summary" class="ab-summary-line"></div>
+        <div class="ab-actions">
+          <button id="air-back-to-tank" type="button" class="ab-btn ab-btn-secondary">Back</button>
+          <button id="air-to-review" type="button" class="ab-btn ab-btn-primary">Review Build</button>
+        </div>
+      </div>
+
+      <div id="air-slide-review" class="ab-glass ab-slide">
+        <div class="ab-mobile-step">Review Your Build</div>
+        <div class="ab-slide-title">Review Your Build</div>
+        <div class="ab-slide-sub">Make sure everything looks right before adding it to cart.</div>
+
+        <div class="ab-review ab-review-mobile-hide">
+          <div class="ab-review-row"><div class="ab-review-label">Vehicle</div><div id="air-review-vehicle" class="ab-review-value"></div></div>
+          <div class="ab-review-row"><div class="ab-review-label">Suspension</div><div id="air-review-suspension" class="ab-review-value"></div></div>
+          <div class="ab-review-row"><div class="ab-review-label">Management</div><div id="air-review-management" class="ab-review-value"></div></div>
+          <div class="ab-review-row"><div class="ab-review-label">Tank + Compressor</div><div id="air-review-tank" class="ab-review-value"></div></div>
+          <div class="ab-review-row"><div class="ab-review-label">Add-Ons</div><div id="air-review-addons" class="ab-review-value"></div></div>
+        </div>
+
+        <div class="ab-mobile-summary">
+          <div class="ab-mobile-summary-title">Build Summary</div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Vehicle</div><div id="air-mobile-vehicle" class="ab-mobile-summary-value"></div></div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Suspension</div><div id="air-mobile-suspension" class="ab-mobile-summary-value"></div></div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Management</div><div id="air-mobile-management" class="ab-mobile-summary-value"></div></div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Tank + Compressor</div><div id="air-mobile-tank" class="ab-mobile-summary-value"></div></div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Add-Ons</div><div id="air-mobile-addons" class="ab-mobile-summary-value"></div></div>
+          <div class="ab-mobile-summary-row"><div class="ab-mobile-summary-label">Kit Total</div><div id="air-mobile-total" class="ab-mobile-summary-value"></div></div>
+        </div>
+
+        <div class="ab-actions">
+          <button id="air-back-to-addons" type="button" class="ab-btn ab-btn-secondary">Back</button>
+          <button id="air-add-to-cart" type="button" class="ab-btn ab-btn-primary">Add Build to Cart <span id="air-cart-price" class="ab-cart-price">$0.00</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  let FITMENTS = [];
+  let currentFitment = null;
+  let skuDetails = {};
+
+  let GLOBAL_MANAGEMENT_SKUS = ["27680", "27685", "27480", "27485"];
+  let GLOBAL_TANK_SKUS = ["27801", "27802", "27803", "27804", "27805", "27806", "27807", "27808", "27762", "27764", "27767", "27769"];
+  let GLOBAL_ADDON_SKUS = ["27705", "27703", "27750", "27751"];
+
+  function getManagementSkus() {
+  return currentFitment?.managementSkus?.length ? currentFitment.managementSkus : GLOBAL_MANAGEMENT_SKUS;
+}
+
+function getTankSkus() {
+  return currentFitment?.tankSkus?.length ? currentFitment.tankSkus : GLOBAL_TANK_SKUS;
+}
+
+function getAddonSkus() {
+  return currentFitment?.addonSkus?.length ? currentFitment.addonSkus : GLOBAL_ADDON_SKUS;
+}
+
+  const yearEl = document.getElementById("air-year");
+  const makeEl = document.getElementById("air-make");
+  const modelEl = document.getElementById("air-model");
+  const driveEl = document.getElementById("air-drive");
+  const fitmentResultEl = document.getElementById("air-fitment-result");
+  const builderAreaEl = document.getElementById("air-builder-area");
+  const progressEl = document.getElementById("air-progress");
+  const summaryShellEl = document.getElementById("air-summary-shell");
+
+  const slideSuspensionEl = document.getElementById("air-slide-suspension");
+  const slideManagementEl = document.getElementById("air-slide-management");
+  const slideTankEl = document.getElementById("air-slide-tank");
+  const slideAddonsEl = document.getElementById("air-slide-addons");
+  const slideReviewEl = document.getElementById("air-slide-review");
+
+  const slideErrorSuspensionEl = document.getElementById("air-slide-error-suspension");
+  const slideErrorManagementEl = document.getElementById("air-slide-error-management");
+  const slideErrorTankEl = document.getElementById("air-slide-error-tank");
+
+  const kitGridEl = document.getElementById("air-kit-grid");
+  const managementGridEl = document.getElementById("air-management-grid");
+  const tankGridEl = document.getElementById("air-tank-grid");
+  const addonGridEl = document.getElementById("air-addon-grid");
+
+  const suspensionSummaryEl = document.getElementById("air-suspension-summary");
+  const managementSummaryEl = document.getElementById("air-management-summary");
+  const tankSummaryEl = document.getElementById("air-tank-summary");
+  const addonSummaryEl = document.getElementById("air-addon-summary");
+
+  const reviewVehicleEl = document.getElementById("air-review-vehicle");
+  const reviewSuspensionEl = document.getElementById("air-review-suspension");
+  const reviewManagementEl = document.getElementById("air-review-management");
+  const reviewTankEl = document.getElementById("air-review-tank");
+  const reviewAddonsEl = document.getElementById("air-review-addons");
+
+  const sideVehicleEl = document.getElementById("air-side-vehicle");
+  const sideSuspensionEl = document.getElementById("air-side-suspension");
+  const sideManagementEl = document.getElementById("air-side-management");
+  const sideTankEl = document.getElementById("air-side-tank");
+  const sideAddonsEl = document.getElementById("air-side-addons");
+  const sideTotalEl = document.getElementById("air-side-total");
+
+  const mobileVehicleEl = document.getElementById("air-mobile-vehicle");
+  const mobileSuspensionEl = document.getElementById("air-mobile-suspension");
+  const mobileManagementEl = document.getElementById("air-mobile-management");
+  const mobileTankEl = document.getElementById("air-mobile-tank");
+  const mobileAddonsEl = document.getElementById("air-mobile-addons");
+  const mobileTotalEl = document.getElementById("air-mobile-total");
+  const cartPriceEl = document.getElementById("air-cart-price");
+
+  const slides = {
+    suspension: slideSuspensionEl,
+    management: slideManagementEl,
+    tank: slideTankEl,
+    addons: slideAddonsEl,
+    review: slideReviewEl
+  };
+
+  const state = {
+    frontSelected: false,
+    rearSelected: false,
+    noSuspension: false,
+    managementSku: "",
+    noManagement: false,
+    tankSku: "",
+    noTank: false,
+    addons: []
+  };
+
+  function uniq(arr) { return [...new Set(arr)]; }
+  function moneyFormat(cents) { return typeof cents === "number" ? "$" + (cents / 100).toFixed(2) : "$0.00"; }
+
+  function clearInlineErrors() {
+    [slideErrorSuspensionEl, slideErrorManagementEl, slideErrorTankEl].forEach((el) => {
+      el.style.display = "none";
+      el.textContent = "";
+    });
+  }
+
+  function showInlineError(el, msg) {
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+
+  function resetMake() {
+    makeEl.innerHTML = '<option value="">Select Make</option>';
+    makeEl.disabled = true;
+  }
+
+  function resetModel() {
+    modelEl.innerHTML = '<option value="">Select Model</option>';
+    modelEl.disabled = true;
+  }
+
+  function resetDrive() {
+    driveEl.innerHTML = '<option value="">Select Drivetrain</option>';
+    driveEl.disabled = true;
+  }
+
+  function buildVehicleLabel() {
+    return [yearEl.value, makeEl.value, modelEl.value, driveEl.value].filter(Boolean).join(" ");
+  }
+
+  function resetBuilderState() {
+    currentFitment = null;
+    skuDetails = {};
+    state.frontSelected = false;
+    state.rearSelected = false;
+    state.noSuspension = false;
+    state.managementSku = "";
+    state.noManagement = false;
+    state.tankSku = "";
+    state.noTank = false;
+    state.addons = [];
+
+    fitmentResultEl.innerHTML = "";
+    builderAreaEl.style.display = "none";
+    progressEl.style.display = "none";
+    summaryShellEl.style.display = "none";
+    clearInlineErrors();
+
+    Object.values(slides).forEach((slide) => slide.classList.remove("is-active"));
+    kitGridEl.innerHTML = "";
+    managementGridEl.innerHTML = "";
+    tankGridEl.innerHTML = "";
+    addonGridEl.innerHTML = "";
+    suspensionSummaryEl.innerHTML = "";
+    managementSummaryEl.innerHTML = "";
+    tankSummaryEl.innerHTML = "";
+    addonSummaryEl.innerHTML = "";
+    reviewVehicleEl.innerHTML = "";
+    reviewSuspensionEl.innerHTML = "";
+    reviewManagementEl.innerHTML = "";
+    reviewTankEl.innerHTML = "";
+    reviewAddonsEl.innerHTML = "";
+    updateSummary();
+  }
+
+  function buildYears() {
+    yearEl.innerHTML = '<option value="">Select Year</option>';
+    const years = [];
+    FITMENTS.forEach((f) => {
+      for (let y = f.yearStart; y <= f.yearEnd; y++) years.push(y);
+    });
+    uniq(years).sort((a, b) => b - a).forEach((year) => {
+      yearEl.innerHTML += '<option value="' + year + '">' + year + "</option>";
+    });
+  }
+
+  function buildProgress(currentStep) {
+    const order = ["suspension", "management", "tank", "addons"];
+    const currentIndex = order.indexOf(currentStep);
+    progressEl.querySelectorAll(".ab-step").forEach((stepEl) => {
+      const stepName = stepEl.getAttribute("data-step");
+      const stepIndex = order.indexOf(stepName);
+      stepEl.classList.remove("is-current", "is-complete");
+      if (stepIndex < currentIndex) stepEl.classList.add("is-complete");
+      if (stepIndex === currentIndex) stepEl.classList.add("is-current");
+    });
+  }
+
+  function showSlide(name) {
+    Object.values(slides).forEach((slide) => slide.classList.remove("is-active"));
+    if (slides[name]) slides[name].classList.add("is-active");
+    buildProgress(name === "review" ? "addons" : name);
+    clearInlineErrors();
+  }
+
+  function buildProductCard(product, type) {
+    const imageHtml = product.image
+      ? '<img src="' + product.image + '" alt="' + (product.title || product.sku) + '" class="ab-img">'
+      : '<div style="font-size:13px; color:#999;">No image</div>';
+
+    const priceHtml = product.priceCents ? '<div class="ab-price">' + moneyFormat(product.priceCents) + '</div>' : '<div class="ab-price">&nbsp;</div>';
+
+    return `
+      <div class="ab-card" data-type="${type}" data-sku="${product.sku}">
+        <div class="ab-img-wrap">${imageHtml}</div>
+        <div class="ab-meta">Part # ${product.sku}</div>
+        <div class="ab-title">${product.title || product.sku}</div>
+        <div class="ab-note">&nbsp;</div>
+        ${priceHtml}
+      </div>
+    `;
+  }
+
+  function buildOptionCard(title, note, type) {
+    return `
+      <div class="ab-card" data-type="${type}" data-sku="">
+        <div class="ab-img-wrap">
+          <div style="font-size:14px; font-weight:800; color:#111;">None</div>
+        </div>
+        <div class="ab-meta">&nbsp;</div>
+        <div class="ab-title">${title}</div>
+        <div class="ab-note">${note}</div>
+        <div class="ab-price">&nbsp;</div>
+      </div>
+    `;
+  }
+
+  async function enrichProducts(products) {
+    const enriched = await Promise.all(
+      products.map(async function (product) {
+        if (skuDetails[product.sku] && skuDetails[product.sku].image) return skuDetails[product.sku];
+
+        const fallback = {
+          ...product,
+          title: product.title || product.sku,
+          image: product.image || "",
+          variantId: product.variantId || "",
+          priceCents: null
+        };
+
+        if (!product.handle) return fallback;
+
+        try {
+          const res = await fetch("/products/" + product.handle + ".js");
+          if (!res.ok) return fallback;
+          const shopifyProduct = await res.json();
+          const chosenVariant =
+            (shopifyProduct.variants || []).find((variant) => variant.available) ||
+            (shopifyProduct.variants || [])[0] ||
+            null;
+
+          return {
+            ...fallback,
+            title: shopifyProduct.title || fallback.title,
+            image: shopifyProduct.featured_image || fallback.image,
+            variantId: chosenVariant ? chosenVariant.id : fallback.variantId,
+            priceCents: chosenVariant ? Number(chosenVariant.price) : null
+          };
+        } catch (e) {
+          return fallback;
+        }
+      })
+    );
+
+    enriched.forEach((product) => { skuDetails[product.sku] = product; });
+    updateSummary();
+    return enriched;
+  }
+
+  async function loadSkuSection(skus, containerEl, type) {
+    const res = await fetch("/apps/air-builder/products?skus=" + encodeURIComponent(skus.join(",")));
+    const data = await res.json();
+    const enrichedProducts = await enrichProducts(data.products || []);
+    containerEl.innerHTML = enrichedProducts.map((product) => buildProductCard(product, type)).join("");
+  }
+
+  function setCenteredGridIfNeeded(containerEl) {
+    const count = containerEl.querySelectorAll(".ab-card").length;
+    containerEl.classList.toggle("ab-grid--3", count === 3);
+  }
+
+  function selectedSuspensionTitles() {
+    if (state.noSuspension || !currentFitment) return [];
+    const arr = [];
+    if (state.frontSelected && skuDetails[currentFitment.frontSku]) arr.push(skuDetails[currentFitment.frontSku].title);
+    if (state.rearSelected && skuDetails[currentFitment.rearSku]) arr.push(skuDetails[currentFitment.rearSku].title);
+    return arr;
+  }
+
+  function getEstimatedTotal() {
+    let total = 0;
+    if (!state.noSuspension && currentFitment) {
+      if (state.frontSelected && skuDetails[currentFitment.frontSku]?.priceCents) total += skuDetails[currentFitment.frontSku].priceCents;
+      if (state.rearSelected && skuDetails[currentFitment.rearSku]?.priceCents) total += skuDetails[currentFitment.rearSku].priceCents;
+    }
+    if (!state.noManagement && state.managementSku && skuDetails[state.managementSku]?.priceCents) total += skuDetails[state.managementSku].priceCents;
+    if (!state.noTank && !state.noTank && state.tankSku && skuDetails[state.tankSku]?.priceCents) total += skuDetails[state.tankSku].priceCents;
+    state.addons.forEach((sku) => { if (skuDetails[sku]?.priceCents) total += skuDetails[sku].priceCents; });
+    return total;
+  }
+
+  function updateSummary() {
+    const vehicleText = buildVehicleLabel() || "Not selected";
+
+    let suspensionText = "Not selected";
+    if (state.noSuspension) {
+      suspensionText = "No Suspension";
+    } else {
+      const titles = selectedSuspensionTitles();
+      suspensionText = titles.length ? titles.join(" + ") : "Not selected";
+    }
+
+        let managementText = "Not selected";
+    let tankText = "Not selected";
+
+    if (state.noManagement) {
+      managementText = "No Management";
+    } else {
+      managementText = state.managementSku && skuDetails[state.managementSku]
+        ? skuDetails[state.managementSku].title
+        : "Not selected";
+    }
+
+    tankText = state.noTank
+      ? "No Tank + Compressor"
+      : (state.tankSku && skuDetails[state.tankSku]
+          ? skuDetails[state.tankSku].title
+          : "Not selected");
+
+    const addonsText = state.addons.length ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join(", ") : "None";
+    const totalText = moneyFormat(getEstimatedTotal());
+
+    sideVehicleEl.textContent = vehicleText;
+    sideSuspensionEl.innerHTML = suspensionText;
+    sideManagementEl.textContent = managementText;
+    sideTankEl.textContent = tankText;
+    sideAddonsEl.innerHTML = addonsText;
+    sideTotalEl.textContent = totalText;
+
+    mobileVehicleEl.textContent = vehicleText;
+    mobileSuspensionEl.innerHTML = suspensionText;
+    mobileManagementEl.textContent = managementText;
+    mobileTankEl.textContent = tankText;
+    mobileAddonsEl.innerHTML = addonsText;
+    mobileTotalEl.textContent = totalText;
+
+    cartPriceEl.textContent = totalText;
+  }
+
+  function updateSuspensionSummary() {
+    if (state.noSuspension) {
+      suspensionSummaryEl.innerHTML = "Selected: No Suspension";
+      return updateSummary();
+    }
+    const chosen = [];
+    if (state.frontSelected) chosen.push("Front Suspension");
+    if (state.rearSelected) chosen.push("Rear Suspension");
+    suspensionSummaryEl.innerHTML = chosen.length ? "Selected: " + chosen.join(" + ") : "Select front, rear, both, or no suspension.";
+    updateSummary();
+  }
+
+  function updateManagementSummary() {
+    if (state.noManagement) {
+      managementSummaryEl.innerHTML = "Selected: No Management";
+      return updateSummary();
+    }
+    managementSummaryEl.innerHTML = state.managementSku ? "Selected: " + (skuDetails[state.managementSku]?.title || state.managementSku) : "Select a management option or choose no management.";
+    updateSummary();
+  }
+
+  function updateTankSummary() {
+    if (state.noTank) {
+      tankSummaryEl.innerHTML = "Selected: No Tank + Compressor";
+      return updateSummary();
+    }
+    tankSummaryEl.innerHTML = state.tankSku ? "Selected: " + (skuDetails[state.tankSku]?.title || state.tankSku) : "Select a tank + compressor setup or choose no tank + compressor.";
+    updateSummary();
+  }
+
+  function updateAddonSummary() {
+    addonSummaryEl.innerHTML = state.addons.length ? "Selected Add-Ons: " + state.addons.map((sku) => skuDetails[sku]?.title || sku).join(", ") : "No add-ons selected.";
+    updateSummary();
+  }
+
+  function getVariantIdFromSku(sku) { return skuDetails[sku] && skuDetails[sku].variantId ? skuDetails[sku].variantId : null; }
+
+  function buildReview() {
+    reviewVehicleEl.innerHTML = buildVehicleLabel();
+    if (state.noSuspension) {
+      reviewSuspensionEl.innerHTML = "No Suspension";
+    } else {
+      const parts = [];
+      if (state.frontSelected) parts.push(skuDetails[currentFitment.frontSku]?.title || currentFitment.frontSku);
+      if (state.rearSelected) parts.push(skuDetails[currentFitment.rearSku]?.title || currentFitment.rearSku);
+      reviewSuspensionEl.innerHTML = parts.length ? parts.join("<br>") : "No Suspension";
+    }
+
+    reviewManagementEl.innerHTML = state.noManagement ? "No Management" : (state.managementSku && skuDetails[state.managementSku] ? skuDetails[state.managementSku].title : "None");
+        reviewTankEl.innerHTML = state.noTank
+      ? "No Tank + Compressor"
+      : (state.tankSku && skuDetails[state.tankSku]
+          ? skuDetails[state.tankSku].title
+          : "None");
+    reviewAddonsEl.innerHTML = state.addons.length ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join("<br>") : "No Add-Ons";
+    updateSummary();
+  }
+
+  function bindSuspensionCards() {
+    const kitCards = kitGridEl.querySelectorAll('.ab-card[data-type="kit"]');
+    const noSuspensionCard = kitGridEl.querySelector('.ab-card[data-type="no-suspension"]');
+
+    kitCards.forEach((card) => {
+      card.onclick = function () {
+        const sku = this.dataset.sku || "";
+        if (!sku || !currentFitment) return;
+        if (sku === currentFitment.frontSku) {
+          state.frontSelected = !state.frontSelected;
+          this.classList.toggle("is-selected", state.frontSelected);
+        }
+        if (sku === currentFitment.rearSku) {
+          state.rearSelected = !state.rearSelected;
+          this.classList.toggle("is-selected", state.rearSelected);
+        }
+        if (state.frontSelected || state.rearSelected) {
+          state.noSuspension = false;
+          if (noSuspensionCard) noSuspensionCard.classList.remove("is-selected");
+        }
+        updateSuspensionSummary();
+        clearInlineErrors();
+      };
+    });
+
+    if (noSuspensionCard) {
+      noSuspensionCard.onclick = function () {
+        state.noSuspension = true;
+        state.frontSelected = false;
+        state.rearSelected = false;
+        kitCards.forEach((card) => card.classList.remove("is-selected"));
+        this.classList.add("is-selected");
+        updateSuspensionSummary();
+        clearInlineErrors();
+      };
+    }
+  }
+
+  function bindManagementCards() {
+    const managementCards = managementGridEl.querySelectorAll('.ab-card[data-type="management"]');
+    const noManagementCard = managementGridEl.querySelector('.ab-card[data-type="no-management"]');
+
+    managementCards.forEach((card) => {
+      card.onclick = function () {
+        managementCards.forEach((c) => c.classList.remove("is-selected"));
+        if (noManagementCard) noManagementCard.classList.remove("is-selected");
+        this.classList.add("is-selected");
+        state.managementSku = this.dataset.sku || "";
+        state.noManagement = false;
+        updateManagementSummary();
+        clearInlineErrors();
+      };
+    });
+
+        if (noManagementCard) {
+      noManagementCard.onclick = function () {
+        managementCards.forEach((c) => c.classList.remove("is-selected"));
+        this.classList.add("is-selected");
+        state.managementSku = "";
+        state.noManagement = true;
+        updateManagementSummary();
+        clearInlineErrors();
+      };
+    }
+  }
+
+  function bindTankCards() {
+    const tankCards = tankGridEl.querySelectorAll('.ab-card[data-type="tank"]');
+    const noTankCard = tankGridEl.querySelector('.ab-card[data-type="no-tank"]');
+
+    tankCards.forEach((card) => {
+      card.onclick = function () {
+        tankCards.forEach((c) => c.classList.remove("is-selected"));
+        if (noTankCard) noTankCard.classList.remove("is-selected");
+        this.classList.add("is-selected");
+        state.tankSku = this.dataset.sku || "";
+        state.noTank = false;
+        updateTankSummary();
+        clearInlineErrors();
+      };
+    });
+
+    if (noTankCard) {
+      noTankCard.onclick = function () {
+        tankCards.forEach((c) => c.classList.remove("is-selected"));
+        this.classList.add("is-selected");
+        state.tankSku = "";
+        state.noTank = true;
+        updateTankSummary();
+        clearInlineErrors();
+      };
+    }
+  }
+
+  function bindAddonCards() {
+    const addonCards = addonGridEl.querySelectorAll('.ab-card[data-type="addon"]');
+    addonCards.forEach((card) => {
+      card.onclick = function () {
+        const sku = this.dataset.sku || "";
+        if (!sku) return;
+        if (state.addons.includes(sku)) {
+          state.addons = state.addons.filter((item) => item !== sku);
+          this.classList.remove("is-selected");
+        } else {
+          state.addons.push(sku);
+          this.classList.add("is-selected");
+        }
+        updateAddonSummary();
+      };
+    });
+  }
+
+  async function appendBuilderOrderNote() {
+  const vehicle = buildVehicleLabel();
+  if (!vehicle) return;
+
+  const builderNote = `Air Builder Vehicle: ${vehicle}`;
+
+  try {
+    const cartRes = await fetch("/cart.js");
+    const cart = await cartRes.json();
+    const existingNote = (cart.note || "").trim();
+
+    if (existingNote.includes(builderNote)) return;
+
+    const nextNote = existingNote ? `${existingNote}\n${builderNote}` : builderNote;
+
+    await fetch("/cart/update.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note: nextNote })
+    });
+  } catch (e) {
+    console.error("Order note update failed:", e);
+  }
+}
+
+  function buildCartItems() {
+    const items = [];
+    if (!state.noSuspension && currentFitment) {
+      if (state.frontSelected) {
+        const frontVariantId = getVariantIdFromSku(currentFitment.frontSku);
+        if (frontVariantId) items.push({ id: frontVariantId, quantity: 1 });
+      }
+      if (state.rearSelected) {
+        const rearVariantId = getVariantIdFromSku(currentFitment.rearSku);
+        if (rearVariantId) items.push({ id: rearVariantId, quantity: 1 });
+      }
+    }
+
+    if (!state.noManagement && state.managementSku) {
+      const managementVariantId = getVariantIdFromSku(state.managementSku);
+      if (managementVariantId) items.push({ id: managementVariantId, quantity: 1 });
+    }
+
+        if (!state.noTank && state.tankSku) {
+      const tankVariantId = getVariantIdFromSku(state.tankSku);
+      if (tankVariantId) items.push({ id: tankVariantId, quantity: 1 });
+    }
+
+    state.addons.forEach((sku) => {
+      const addonVariantId = getVariantIdFromSku(sku);
+      if (addonVariantId) items.push({ id: addonVariantId, quantity: 1 });
+    });
+
+    const vehicleLabel = buildVehicleLabel();
+    const suspensionLabel = state.noSuspension ? "No Suspension" : [state.frontSelected ? "Front" : "", state.rearSelected ? "Rear" : ""].filter(Boolean).join(" + ");
+    const managementLabel = state.noManagement ? "No Management" : (skuDetails[state.managementSku]?.title || state.managementSku || "None");
+    const tankLabel = state.noTank ? "No Tank + Compressor" : (skuDetails[state.tankSku]?.title || state.tankSku || "None");
+    const addonLabel = state.addons.length ? state.addons.map((sku) => skuDetails[sku]?.title || sku).join(", ") : "None";
+
+    return items.map((item) => ({
+      ...item,
+      properties: {
+        "_builder": "Air Ride Kit Builder",
+        "Vehicle": vehicleLabel,
+        "Suspension": suspensionLabel || "None",
+        "Management": managementLabel,
+        "Tank + Compressor": tankLabel,
+        "Add-Ons": addonLabel
+      }
+    }));
+  }
+
+  function previousStepsAllowed(step) {
+    if (!currentFitment) return false;
+    const currentStepName = Object.keys(slides).find((key) => slides[key].classList.contains("is-active")) || "suspension";
+    const order = ["suspension", "management", "tank", "addons"];
+    return order.indexOf(step) <= order.indexOf(currentStepName);
+  }
+
+  progressEl.querySelectorAll(".ab-step").forEach((stepEl) => {
+    stepEl.onclick = function () {
+      const step = this.getAttribute("data-step");
+      if (!step || !currentFitment) return;
+      if (!previousStepsAllowed(step)) return;
+      showSlide(step);
+    };
+  });
+
+  async function loadFitments() {
+  try {
+    const res = await fetch("/apps/air-builder/fitments?mode=list");
+    const json = await res.json();
+
+    FITMENTS = Array.isArray(json.fitments) ? json.fitments : [];
+
+    if (json.settings?.managementSkus?.length) {
+      GLOBAL_MANAGEMENT_SKUS = json.settings.managementSkus;
+    }
+    if (json.settings?.tankSkus?.length) {
+      GLOBAL_TANK_SKUS = json.settings.tankSkus;
+    }
+    if (json.settings?.addonSkus?.length) {
+      GLOBAL_ADDON_SKUS = json.settings.addonSkus;
+    }
+
+    if (json.error) {
+      console.error("Fitments route error:", json.error);
+    }
+
+    if (!FITMENTS.length) {
+      fitmentResultEl.innerHTML = "No fitments loaded.";
+    }
+  } catch (e) {
+    FITMENTS = [];
+    fitmentResultEl.innerHTML = "Unable to load fitment data.";
+    console.error("Fitment load error:", e);
+  }
+}
+
+  (async function initBuilder() {
+    await loadFitments();
+    buildYears();
+    updateSummary();
+  })();
+
+  yearEl.onchange = function () {
+    resetMake();
+    resetModel();
+    resetDrive();
+    resetBuilderState();
+
+    const selectedYear = Number(yearEl.value);
+    if (!selectedYear) return;
+
+    const makes = uniq(
+      FITMENTS
+        .filter((f) => selectedYear >= f.yearStart && selectedYear <= f.yearEnd)
+        .map((f) => f.make)
+    ).sort();
+
+    makes.forEach((make) => { makeEl.innerHTML += '<option value="' + make + '">' + make + "</option>"; });
+    makeEl.disabled = false;
+    updateSummary();
+  };
+
+  makeEl.onchange = function () {
+    resetModel();
+    resetDrive();
+    resetBuilderState();
+
+    const selectedYear = Number(yearEl.value);
+    const selectedMake = makeEl.value;
+    if (!selectedYear || !selectedMake) return;
+
+    const models = uniq(
+      FITMENTS
+        .filter((f) => selectedYear >= f.yearStart && selectedYear <= f.yearEnd && f.make === selectedMake)
+        .map((f) => f.model)
+    ).sort();
+
+    models.forEach((model) => { modelEl.innerHTML += '<option value="' + model + '">' + model + "</option>"; });
+    modelEl.disabled = false;
+    updateSummary();
+  };
+
+  modelEl.onchange = function () {
+    resetDrive();
+    resetBuilderState();
+
+    const selectedYear = Number(yearEl.value);
+    const selectedMake = makeEl.value;
+    const selectedModel = modelEl.value;
+    if (!selectedYear || !selectedMake || !selectedModel) return;
+
+    const drives = uniq(
+      FITMENTS
+        .filter((f) =>
+          selectedYear >= f.yearStart &&
+          selectedYear <= f.yearEnd &&
+          f.make === selectedMake &&
+          f.model === selectedModel
+        )
+        .map((f) => f.drive)
+    ).sort();
+
+    drives.forEach((drive) => { driveEl.innerHTML += '<option value="' + drive + '">' + drive + "</option>"; });
+    driveEl.disabled = false;
+    updateSummary();
+  };
+
+  driveEl.onchange = function () {
+    resetBuilderState();
+    updateSummary();
+  };
+
+  document.getElementById("air-check-fitment").onclick = async function () {
+    const year = yearEl.value;
+    const make = makeEl.value;
+    const model = modelEl.value;
+    const drivetrain = driveEl.value;
+
+    resetBuilderState();
+
+    if (!year || !make || !model || !drivetrain) {
+      fitmentResultEl.innerHTML = "Please select year, make, model, and drivetrain.";
+      return;
+    }
+
+    const fitmentRes = await fetch(
+      "/apps/air-builder/fitments?year=" +
+        encodeURIComponent(year) +
+        "&make=" +
+        encodeURIComponent(make) +
+        "&model=" +
+        encodeURIComponent(model) +
+        "&drivetrain=" +
+        encodeURIComponent(drivetrain)
+    );
+
+    const fitmentData = await fitmentRes.json();
+
+    if (!fitmentData.fitment) {
+      fitmentResultEl.innerHTML = "No fitment found.";
+      return;
+    }
+
+    currentFitment = fitmentData.fitment;
+    fitmentResultEl.innerHTML = "";
+    builderAreaEl.style.display = "block";
+    progressEl.style.display = "grid";
+    summaryShellEl.style.display = "block";
+
+    await loadSkuSection([currentFitment.frontSku, currentFitment.rearSku], kitGridEl, "kit");
+    kitGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Suspension", "Skip front and rear suspension.", "no-suspension"));
+    setCenteredGridIfNeeded(kitGridEl);
+    bindSuspensionCards();
+    updateSuspensionSummary();
+    buildProgress("suspension");
+    showSlide("suspension");
+  };
+
+  document.getElementById("air-to-management").onclick = async function () {
+    if (!state.noSuspension && !state.frontSelected && !state.rearSelected) {
+      showInlineError(slideErrorSuspensionEl, "Select front, rear, both, or click No Suspension to continue.");
+      return;
+    }
+
+    if (!managementGridEl.innerHTML.trim()) {
+      await loadSkuSection(
+        getManagementSkus(),
+        managementGridEl,
+        "management"
+      );
+      managementGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Management", "Continue without a management system.", "no-management"));
+      setCenteredGridIfNeeded(managementGridEl);
+      bindManagementCards();
+      updateManagementSummary();
+    }
+
+    showSlide("management");
+  };
+
+  document.getElementById("air-back-to-suspension").onclick = function () { showSlide("suspension"); };
+
+    document.getElementById("air-to-tank").onclick = async function () {
+    if (!state.noManagement && !state.managementSku) {
+      showInlineError(slideErrorManagementEl, "Select a management system or click No Management to continue.");
+      return;
+    }
+
+    if (!tankGridEl.innerHTML.trim()) {
+      await loadSkuSection(
+        getTankSkus(),
+        tankGridEl,
+        "tank"
+      );
+      tankGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Tank + Compressor", "Continue without a tank and compressor.", "no-tank"));
+      setCenteredGridIfNeeded(tankGridEl);
+      bindTankCards();
+      updateTankSummary();
+    }
+
+    showSlide("tank");
+  };
+
+  document.getElementById("air-back-to-management").onclick = function () { showSlide("management"); };
+
+  document.getElementById("air-to-addons").onclick = async function () {
+    if (!state.noTank && !state.tankSku) {
+      showInlineError(slideErrorTankEl, "Select a tank + compressor setup or click No Tank + Compressor to continue.");
+      return;
+    }
+
+    if (!addonGridEl.innerHTML.trim()) {
+      await loadSkuSection(
+        getAddonSkus(),
+        addonGridEl,
+        "addon"
+      );
+      setCenteredGridIfNeeded(addonGridEl);
+      bindAddonCards();
+      updateAddonSummary();
+    }
+
+    showSlide("addons");
+  };
+
+    document.getElementById("air-back-to-tank").onclick = function () {
+    showSlide("tank");
+  };
+
+  document.getElementById("air-to-review").onclick = function () {
+    buildReview();
+    showSlide("review");
+  };
+
+  document.getElementById("air-back-to-addons").onclick = function () { showSlide("addons"); };
+
+  document.getElementById("air-add-to-cart").onclick = async function () {
+    if (!currentFitment) return;
+    const items = buildCartItems();
+    if (!items.length) return;
+
+    const button = this;
+    button.disabled = true;
+    button.innerHTML = 'Adding to Cart... <span class="ab-cart-price">' + moneyFormat(getEstimatedTotal()) + '</span>';
+
+    try {
+      const response = await fetch("/cart/add.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items })
+      });
+      if (!response.ok) throw new Error("Cart add failed");
+      await appendBuilderOrderNote();
+      window.location.href = "/cart";
+    } catch (e) {
+      fitmentResultEl.innerHTML = "There was a problem adding the build to cart.";
+    } finally {
+      button.disabled = false;
+      button.innerHTML = 'Add Build to Cart <span id="air-cart-price" class="ab-cart-price">' + moneyFormat(getEstimatedTotal()) + '</span>';
+    }
+  };
+});
+</script>
+
+{% schema %}
+{
+  "name": "Air Builder",
+  "target": "section"
+}
+{% endschema %}
