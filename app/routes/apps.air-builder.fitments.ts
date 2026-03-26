@@ -1,4 +1,5 @@
 import { json } from "@remix-run/node";
+import { authenticate } from "../shopify.server";
 
 type FitmentRecord = {
   yearStart: number;
@@ -31,16 +32,6 @@ function fieldsToObject(fields: Array<{ key: string; value: string | null }>) {
   }, {});
 }
 
-function jsonResponse(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store",
-    },
-  });
-}
-
 export async function loader({ request }: any) {
   const url = new URL(request.url);
   const mode = url.searchParams.get("mode") || "match";
@@ -55,33 +46,7 @@ export async function loader({ request }: any) {
   });
 
   try {
-    let admin: any;
-
-    try {
-      const authResult = await authenticate.public.appProxy(request);
-      admin = authResult.admin;
-      console.log("APP PROXY AUTH OK");
-    } catch (authError: any) {
-      console.error("APP PROXY AUTH FAILED", {
-        message: authError?.message,
-        stack: authError?.stack,
-      });
-
-      return jsonResponse(
-        {
-          fitment: null,
-          fitments: [],
-          settings: {
-            managementSkus: [],
-            tankSkus: [],
-            addonSkus: [],
-          },
-          error: "App proxy auth failed",
-          details: authError?.message || "Unknown auth error",
-        },
-        200
-      );
-    }
+    const { admin } = await authenticate.public.appProxy(request);
 
     const response = await admin.graphql(`
       query AirRideFitments {
@@ -109,11 +74,9 @@ export async function loader({ request }: any) {
       }
     `);
 
-    const json = await response.json();
-    console.log("GRAPHQL RESPONSE OK");
-
-    const nodes = json?.data?.metaobjects?.nodes || [];
-    const shop = json?.data?.shop || {};
+    const gql = await response.json();
+    const nodes = gql?.data?.metaobjects?.nodes || [];
+    const shop = gql?.data?.shop || {};
 
     const settings = {
       managementSkus: parseCsv(shop?.managementSkus?.value),
@@ -148,18 +111,18 @@ export async function loader({ request }: any) {
       );
 
     if (mode === "list") {
-  return json({
-    fitments: fitments.map((f) => ({
-      yearStart: f.yearStart,
-      yearEnd: f.yearEnd,
-      make: f.make,
-      model: f.model,
-      drive: f.drivetrain || "",
-    })),
-    settings,
-  });
-}
-
+      return json({
+        fitment: null,
+        fitments: fitments.map((f) => ({
+          yearStart: f.yearStart,
+          yearEnd: f.yearEnd,
+          make: f.make,
+          model: f.model,
+          drive: f.drivetrain,
+        })),
+        settings,
+      });
+    }
 
     const year = Number(url.searchParams.get("year") || "");
     const make = url.searchParams.get("make") || "";
@@ -167,7 +130,7 @@ export async function loader({ request }: any) {
     const drivetrain = url.searchParams.get("drivetrain") || "";
 
     if (!year || !make || !model || !drivetrain) {
-      return jsonResponse({ fitment: null, settings });
+      return json({ fitment: null, settings });
     }
 
     const match = fitments.find((f) => {
@@ -181,10 +144,10 @@ export async function loader({ request }: any) {
     });
 
     if (!match) {
-      return jsonResponse({ fitment: null, settings });
+      return json({ fitment: null, settings });
     }
 
-    return jsonResponse({
+    return json({
       fitment: {
         frontSku: match.frontSku,
         rearSku: match.rearSku,
@@ -195,12 +158,9 @@ export async function loader({ request }: any) {
       settings,
     });
   } catch (error: any) {
-    console.error("FITMENTS LOADER FAILED", {
-      message: error?.message,
-      stack: error?.stack,
-    });
+    console.error("apps.air-builder.fitments.ts error:", error);
 
-    return jsonResponse({
+    return json({
       fitment: null,
       fitments: [],
       settings: {
