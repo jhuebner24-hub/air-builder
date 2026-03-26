@@ -1,4 +1,4 @@
-import { authenticate } from "../shopify.server";
+import { json } from "@remix-run/node";
 
 type FitmentRecord = {
   yearStart: number;
@@ -148,7 +148,7 @@ export async function loader({ request }: any) {
       );
 
     if (mode === "list") {
-  return data({
+  return json({
     fitments: fitments.map((f) => ({
       yearStart: f.yearStart,
       yearEnd: f.yearEnd,
