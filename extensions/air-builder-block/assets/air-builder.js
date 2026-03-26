@@ -695,28 +695,7 @@
     }
 
     async function appendBuilderOrderNote() {
-      const vehicle = buildVehicleLabel();
-      if (!vehicle) return;
-
-      const builderNote = `Air Builder Vehicle: ${vehicle}`;
-
-      try {
-        const cartRes = await fetch("/cart.js");
-        const cart = await cartRes.json();
-        const existingNote = (cart.note || "").trim();
-
-        if (existingNote.includes(builderNote)) return;
-
-        const nextNote = existingNote ? `${existingNote}\n${builderNote}` : builderNote;
-
-        await fetch("/cart/update.js", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ note: nextNote })
-        });
-      } catch (e) {
-        console.error("Order note update failed:", e);
-      }
+      return;
     }
 
     function buildCartItems() {
@@ -948,7 +927,7 @@
         const oldText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = "Loading kit...";
-        fitmentResultEl.innerHTML = "Loading kit...";
+        fitmentResultEl.innerHTML = "";
 
         try {
           const fitmentRes = await fetch(
@@ -1072,26 +1051,13 @@
 
     document.getElementById("air-to-review").onclick = function () {
   try {
-    if (reviewVehicleEl) reviewVehicleEl.innerHTML = "TEST VEHICLE";
-    if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = "TEST SUSPENSION";
-    if (reviewManagementEl) reviewManagementEl.innerHTML = "TEST MANAGEMENT";
-    if (reviewTankEl) reviewTankEl.innerHTML = "TEST TANK";
-    if (reviewAddonsEl) reviewAddonsEl.innerHTML = "TEST ADDONS";
-
-    if (mobileVehicleEl) mobileVehicleEl.textContent = "TEST VEHICLE";
-    if (mobileSuspensionEl) mobileSuspensionEl.textContent = "TEST SUSPENSION";
-    if (mobileManagementEl) mobileManagementEl.textContent = "TEST MANAGEMENT";
-    if (mobileTankEl) mobileTankEl.textContent = "TEST TANK";
-    if (mobileAddonsEl) mobileAddonsEl.textContent = "TEST ADDONS";
-    if (mobileTotalEl) mobileTotalEl.textContent = "$123.45";
-
+    buildReview();
     showSlide("review");
-      } catch (error) {
+  } catch (error) {
     console.error("Review step error:", error);
     fitmentResultEl.innerHTML = "There was a problem loading the review step.";
-      }  
-     };
-
+  }
+};
 
     document.getElementById("air-back-to-addons").onclick = function () {
       showSlide("addons");
