@@ -1072,17 +1072,26 @@
 
     document.getElementById("air-to-review").onclick = function () {
   try {
-    buildReview();
-    showSlide("review");
+    if (reviewVehicleEl) reviewVehicleEl.innerHTML = "TEST VEHICLE";
+    if (reviewSuspensionEl) reviewSuspensionEl.innerHTML = "TEST SUSPENSION";
+    if (reviewManagementEl) reviewManagementEl.innerHTML = "TEST MANAGEMENT";
+    if (reviewTankEl) reviewTankEl.innerHTML = "TEST TANK";
+    if (reviewAddonsEl) reviewAddonsEl.innerHTML = "TEST ADDONS";
 
-    setTimeout(() => {
-      buildReview();
-    }, 50);
-  } catch (error) {
+    if (mobileVehicleEl) mobileVehicleEl.textContent = "TEST VEHICLE";
+    if (mobileSuspensionEl) mobileSuspensionEl.textContent = "TEST SUSPENSION";
+    if (mobileManagementEl) mobileManagementEl.textContent = "TEST MANAGEMENT";
+    if (mobileTankEl) mobileTankEl.textContent = "TEST TANK";
+    if (mobileAddonsEl) mobileAddonsEl.textContent = "TEST ADDONS";
+    if (mobileTotalEl) mobileTotalEl.textContent = "$123.45";
+
+    showSlide("review");
+      } catch (error) {
     console.error("Review step error:", error);
     fitmentResultEl.innerHTML = "There was a problem loading the review step.";
-  }
-};
+      }  
+     };
+
 
     document.getElementById("air-back-to-addons").onclick = function () {
       showSlide("addons");
