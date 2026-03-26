@@ -424,22 +424,31 @@
 }
 
 #air-builder .ab-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: center;
   margin-top: 18px;
   width: 100%;
 }
 
 #air-builder .ab-actions .ab-btn {
   width: auto;
-  min-width: 124px;
-  flex: 0 0 auto;
+  min-width: 120px;
+  max-width: max-content;
+}
+
+#air-builder .ab-actions .ab-btn:first-child {
+  justify-self: start;
+}
+
+#air-builder .ab-actions .ab-btn:last-child {
+  justify-self: end;
 }
 
 #air-builder .ab-actions .ab-btn:only-child {
-  margin-left: auto;
+  grid-column: 2;
+  justify-self: end;
 }
 
 #air-builder .ab-btn {
@@ -582,24 +591,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  #air-builder .ab-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  #air-builder .ab-actions .ab-btn {
-    width: auto !important;
-    min-width: 110px;
-    max-width: 48%;
-  }
-
-  #air-builder .ab-check-btn {
-    width: 100%;
-  }
-}
-
 @media (max-width: 640px) {
   #air-builder {
     width: calc(100vw - 24px);
@@ -641,6 +632,16 @@
   #air-builder .ab-grid.ab-grid--3 {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+
+  #air-builder .ab-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  #air-builder .ab-actions .ab-btn {
+    min-width: 96px;
+    max-width: 100%;
   }
 
   #air-builder .ab-review-mobile-hide {
