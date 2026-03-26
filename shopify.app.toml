@@ -2,7 +2,7 @@
 
 client_id = "bd326eb081173597c03349637b086c32"
 name = "air-ride-kit"
-application_url = "https://example.com"
+application_url = "https://air-builder.onrender.com"
 embedded = true
 
 [build]
@@ -24,10 +24,10 @@ api_version = "2026-04"
 scopes = "write_metaobject_definitions,write_metaobjects,write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://air-builder.onrender.com/auth/callback","https://air-builder.onrender.com/api/auth/callback" ]
 
 [app_proxy]
-url = "https://example.com/apps/air-builder"
+url = "https://air-builder.onrender.com"
 subpath = "air-builder"
 prefix = "apps"
 

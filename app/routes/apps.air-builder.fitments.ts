@@ -1,4 +1,3 @@
-import { data } from "react-router";
 import { authenticate } from "../shopify.server";
 
 type FitmentRecord = {
@@ -32,12 +31,57 @@ function fieldsToObject(fields: Array<{ key: string; value: string | null }>) {
   }, {});
 }
 
-export async function loader({ request }: any) {
-  try {
-    const url = new URL(request.url);
-    const mode = url.searchParams.get("mode") || "match";
+function jsonResponse(payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+    },
+  });
+}
 
-    const { admin } = await authenticate.public.appProxy(request);
+export async function loader({ request }: any) {
+  const url = new URL(request.url);
+  const mode = url.searchParams.get("mode") || "match";
+
+  console.log("FITMENTS HIT", {
+    url: request.url,
+    mode,
+    host: request.headers.get("host"),
+    forwardedHost: request.headers.get("x-forwarded-host"),
+    userAgent: request.headers.get("user-agent"),
+    referer: request.headers.get("referer"),
+  });
+
+  try {
+    let admin: any;
+
+    try {
+      const authResult = await authenticate.public.appProxy(request);
+      admin = authResult.admin;
+      console.log("APP PROXY AUTH OK");
+    } catch (authError: any) {
+      console.error("APP PROXY AUTH FAILED", {
+        message: authError?.message,
+        stack: authError?.stack,
+      });
+
+      return jsonResponse(
+        {
+          fitment: null,
+          fitments: [],
+          settings: {
+            managementSkus: [],
+            tankSkus: [],
+            addonSkus: [],
+          },
+          error: "App proxy auth failed",
+          details: authError?.message || "Unknown auth error",
+        },
+        200
+      );
+    }
 
     const response = await admin.graphql(`
       query AirRideFitments {
@@ -66,6 +110,8 @@ export async function loader({ request }: any) {
     `);
 
     const json = await response.json();
+    console.log("GRAPHQL RESPONSE OK");
+
     const nodes = json?.data?.metaobjects?.nodes || [];
     const shop = json?.data?.shop || {};
 
@@ -98,11 +144,11 @@ export async function loader({ request }: any) {
           f.yearEnd &&
           f.make &&
           f.model &&
-          f.drivetrain,
+          f.drivetrain
       );
 
     if (mode === "list") {
-      return data({
+      return jsonResponse({
         fitments: fitments.map((f) => ({
           yearStart: f.yearStart,
           yearEnd: f.yearEnd,
@@ -120,7 +166,7 @@ export async function loader({ request }: any) {
     const drivetrain = url.searchParams.get("drivetrain") || "";
 
     if (!year || !make || !model || !drivetrain) {
-      return data({ fitment: null, settings });
+      return jsonResponse({ fitment: null, settings });
     }
 
     const match = fitments.find((f) => {
@@ -134,10 +180,10 @@ export async function loader({ request }: any) {
     });
 
     if (!match) {
-      return data({ fitment: null, settings });
+      return jsonResponse({ fitment: null, settings });
     }
 
-    return data({
+    return jsonResponse({
       fitment: {
         frontSku: match.frontSku,
         rearSku: match.rearSku,
@@ -148,9 +194,12 @@ export async function loader({ request }: any) {
       settings,
     });
   } catch (error: any) {
-    console.error("apps.air-builder.fitments.ts error:", error);
+    console.error("FITMENTS LOADER FAILED", {
+      message: error?.message,
+      stack: error?.stack,
+    });
 
-    return data({
+    return jsonResponse({
       fitment: null,
       fitments: [],
       settings: {
