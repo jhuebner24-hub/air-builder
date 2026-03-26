@@ -1,131 +1,13 @@
-<div id="air-builder">
-
-
-<div class="ab-wrap">
-<div class="ab-glass ab-vehicle">
-<div class="ab-vehicle-title">Select Your Vehicle</div>
-
-<div class="ab-top-grid">
-<div>
-<div class="ab-field-label">Year</div>
-<select id="air-year"><option value="">Select Year</option></select>
-</div>
-<div>
-<div class="ab-field-label">Make</div>
-<select id="air-make" disabled><option value="">Select Make</option></select>
-</div>
-<div>
-<div class="ab-field-label">Model</div>
-<select id="air-model" disabled><option value="">Select Model</option></select>
-</div>
-<div>
-<div class="ab-field-label">Drivetrain</div>
-<select id="air-drive" disabled><option value="">Select Drivetrain</option></select>
-</div>
-<div>
-<div class="ab-field-label">&nbsp;</div>
-<button id="air-check-fitment" type="button" class="ab-check-btn">Build My Kit</button>
-</div>
-</div>
-
-<div id="air-fitment-result" class="ab-status"></div>
-</div>
-
-<div id="air-builder-area" class="ab-builder-area">
-
-<div id="air-progress" class="ab-progress">
-<div class="ab-step" data-step="suspension">
-<div class="ab-step-kicker">Step 1</div>
-<div class="ab-step-label">Suspension</div>
-</div>
-<div class="ab-step" data-step="management">
-<div class="ab-step-kicker">Step 2</div>
-<div class="ab-step-label">Management</div>
-</div>
-<div class="ab-step" data-step="tank">
-<div class="ab-step-kicker">Step 3</div>
-<div class="ab-step-label">Tank + Compressor</div>
-</div>
-<div class="ab-step" data-step="addons">
-<div class="ab-step-kicker">Step 4</div>
-<div class="ab-step-label">Add-Ons + Review</div>
-</div>
-</div>
-
-<div id="air-summary-shell" class="ab-summary-shell">
-<div class="ab-summary-bar">
-<div class="ab-summary-item">
-<div class="ab-summary-label">Vehicle</div>
-<div id="air-side-vehicle" class="ab-summary-value">Not selected</div>
-</div>
-<div class="ab-summary-item">
-<div class="ab-summary-label">Suspension</div>
-<div id="air-side-suspension" class="ab-summary-value">Not selected</div>
-</div>
-<div class="ab-summary-item">
-<div class="ab-summary-label">Management</div>
-<div id="air-side-management" class="ab-summary-value">Not selected</div>
-</div>
-<div class="ab-summary-item">
-<div class="ab-summary-label">Tank + Compressor</div>
-<div id="air-side-tank" class="ab-summary-value">Not selected</div>
-</div>
-<div class="ab-summary-item">
-<div class="ab-summary-label">Add-Ons</div>
-<div id="air-side-addons" class="ab-summary-value">None</div>
-</div>
-<div class="ab-summary-total">
-<div class="ab-summary-label">Kit Total</div>
-<div id="air-side-total" class="ab-summary-value">$0.00</div>
-</div>
-</div>
-</div>
-
-<!-- SLIDES -->
-
-<div id="air-slide-suspension" class="ab-glass ab-slide">
-<div class="ab-slide-title">Choose Suspension</div>
-<div id="air-kit-grid" class="ab-grid"></div>
-<button id="air-to-management" class="ab-btn ab-btn-primary">Continue</button>
-</div>
-
-<div id="air-slide-management" class="ab-glass ab-slide">
-<div class="ab-slide-title">Select Management</div>
-<div id="air-management-grid" class="ab-grid"></div>
-<button id="air-back-to-suspension" class="ab-btn ab-btn-secondary">Back</button>
-<button id="air-to-tank" class="ab-btn ab-btn-primary">Continue</button>
-</div>
-
-<div id="air-slide-tank" class="ab-glass ab-slide">
-<div class="ab-slide-title">Select Tank + Compressor</div>
-<div id="air-tank-grid" class="ab-grid"></div>
-<button id="air-back-to-management" class="ab-btn ab-btn-secondary">Back</button>
-<button id="air-to-addons" class="ab-btn ab-btn-primary">Continue</button>
-</div>
-
-<div id="air-slide-addons" class="ab-glass ab-slide">
-<div class="ab-slide-title">Add-Ons</div>
-<div id="air-addon-grid" class="ab-grid"></div>
-<button id="air-back-to-tank" class="ab-btn ab-btn-secondary">Back</button>
-<button id="air-to-review" class="ab-btn ab-btn-primary">Review</button>
-</div>
-
-<div id="air-slide-review" class="ab-glass ab-slide">
-<div class="ab-slide-title">Review Build</div>
-<button id="air-back-to-addons" class="ab-btn ab-btn-secondary">Back</button>
-<button id="air-add-to-cart" class="ab-btn ab-btn-primary">Add to Cart</button>
-</div>
-
-</div>
-</div>
-
+<div id="air-builder" style="padding:40px; background:#111; color:#fff; border:2px solid red;">
+  <h2 style="margin:0 0 12px 0;">AIR BUILDER TEST</h2>
+  <p>If you can see this, the app block is rendering.</p>
 </div>
 
 {% schema %}
 {
-"name": "Air Builder",
-"target": "section",
-"stylesheet": "air-builder.css",
-"javascript": "air-builder.js"
+  "name": "Air Builder",
+  "target": "section",
+  "stylesheet": "air-builder.css",
+  "javascript": "air-builder.js"
 }
 {% endschema %}
