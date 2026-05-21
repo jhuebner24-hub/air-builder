@@ -8,6 +8,7 @@ type FitmentRecord = {
   drivetrain: string;
   frontSku: string;
   rearSku: string;
+  fullSuspensionSkus: string[];
   managementSkus: string[];
   tankSkus: string[];
   addonSkus: string[];
@@ -105,6 +106,7 @@ export async function loader({ request }: any) {
           drivetrain: f.drivetrain || "",
           frontSku: f.front_sku || "",
           rearSku: f.rear_sku || "",
+          fullSuspensionSkus: parseCsv(f.full_suspension_skus),
           managementSkus: parseCsv(f.management_skus),
           tankSkus: parseCsv(f.tank_skus),
           addonSkus: parseCsv(f.addon_skus),
@@ -160,6 +162,7 @@ export async function loader({ request }: any) {
       fitment: {
         frontSku: match.frontSku,
         rearSku: match.rearSku,
+        fullSuspensionSkus: match.fullSuspensionSkus,
         managementSkus: match.managementSkus,
         tankSkus: match.tankSkus,
         addonSkus: match.addonSkus,

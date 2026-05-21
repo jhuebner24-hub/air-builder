@@ -32,7 +32,7 @@ function parseCsvRows(csvText: string) {
   if (lines.length < 2) return [];
 
   const headers = lines[0].split(",").map((h) => h.trim());
-  const rows = lines.slice(1).map((line) => {
+  return lines.slice(1).map((line) => {
     const values = line.split(",").map((v) => v.trim());
     const row: Record<string, string> = {};
     headers.forEach((header, index) => {
@@ -40,8 +40,6 @@ function parseCsvRows(csvText: string) {
     });
     return row;
   });
-
-  return rows;
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -105,6 +103,7 @@ export async function action({ request }: ActionFunctionArgs) {
               { name: "Drivetrain", key: "drivetrain", type: "single_line_text_field" }
               { name: "Front SKU", key: "front_sku", type: "single_line_text_field" }
               { name: "Rear SKU", key: "rear_sku", type: "single_line_text_field" }
+              { name: "Full Suspension SKUs", key: "full_suspension_skus", type: "multi_line_text_field" }
               { name: "Management SKUs", key: "management_skus", type: "multi_line_text_field" }
               { name: "Tank SKUs", key: "tank_skus", type: "multi_line_text_field" }
               { name: "Addon SKUs", key: "addon_skus", type: "multi_line_text_field" }
@@ -134,10 +133,7 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
-    return data({
-      ok: true,
-      message: "Definition created.",
-    });
+    return data({ ok: true, message: "Definition created." });
   }
 
   if (intent === "create_fitment") {
@@ -148,11 +144,19 @@ export async function action({ request }: ActionFunctionArgs) {
     const drivetrain = String(formData.get("drivetrain") || "").trim();
     const frontSku = String(formData.get("frontSku") || "").trim();
     const rearSku = String(formData.get("rearSku") || "").trim();
+    const fullSuspensionSkus = String(formData.get("fullSuspensionSkus") || "").trim();
 
-    if (!yearStart || !yearEnd || !make || !model || !drivetrain || !frontSku || !rearSku) {
+    if (!yearStart || !yearEnd || !make || !model || !drivetrain) {
       return data({
         ok: false,
-        message: "Fill in all fields before saving.",
+        message: "Fill in year, make, model, and drivetrain before saving.",
+      });
+    }
+
+    if (!frontSku && !rearSku && !fullSuspensionSkus) {
+      return data({
+        ok: false,
+        message: "Add either front/rear SKUs or at least one full suspension SKU.",
       });
     }
 
@@ -186,6 +190,7 @@ export async function action({ request }: ActionFunctionArgs) {
               { key: "drivetrain", value: drivetrain },
               { key: "front_sku", value: frontSku },
               { key: "rear_sku", value: rearSku },
+              { key: "full_suspension_skus", value: fullSuspensionSkus },
             ],
           },
         },
@@ -202,29 +207,20 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
-    return data({
-      ok: true,
-      message: "Fitment created successfully.",
-    });
+    return data({ ok: true, message: "Fitment created successfully." });
   }
 
   if (intent === "bulk_import_fitments") {
     const csvText = String(formData.get("csvText") || "").trim();
 
     if (!csvText) {
-      return data({
-        ok: false,
-        message: "Paste CSV data first.",
-      });
+      return data({ ok: false, message: "Paste CSV data first." });
     }
 
     const rows = parseCsvRows(csvText);
 
     if (!rows.length) {
-      return data({
-        ok: false,
-        message: "No valid CSV rows found.",
-      });
+      return data({ ok: false, message: "No valid CSV rows found." });
     }
 
     let created = 0;
@@ -238,9 +234,15 @@ export async function action({ request }: ActionFunctionArgs) {
       const drivetrain = String(row.drivetrain || "").trim();
       const frontSku = String(row.frontSku || "").trim();
       const rearSku = String(row.rearSku || "").trim();
+      const fullSuspensionSkus = String(row.fullSuspensionSkus || "").trim();
 
-      if (!yearStart || !yearEnd || !make || !model || !drivetrain || !frontSku || !rearSku) {
+      if (!yearStart || !yearEnd || !make || !model || !drivetrain) {
         errors.push(`Skipped row: ${JSON.stringify(row)}`);
+        continue;
+      }
+
+      if (!frontSku && !rearSku && !fullSuspensionSkus) {
+        errors.push(`Skipped row missing suspension SKUs: ${JSON.stringify(row)}`);
         continue;
       }
 
@@ -274,6 +276,7 @@ export async function action({ request }: ActionFunctionArgs) {
                 { key: "drivetrain", value: drivetrain },
                 { key: "front_sku", value: frontSku },
                 { key: "rear_sku", value: rearSku },
+                { key: "full_suspension_skus", value: fullSuspensionSkus },
               ],
             },
           },
@@ -311,11 +314,16 @@ export async function action({ request }: ActionFunctionArgs) {
     const drivetrain = String(formData.get("drivetrain") || "").trim();
     const frontSku = String(formData.get("frontSku") || "").trim();
     const rearSku = String(formData.get("rearSku") || "").trim();
+    const fullSuspensionSkus = String(formData.get("fullSuspensionSkus") || "").trim();
 
-    if (!id || !yearStart || !yearEnd || !make || !model || !drivetrain || !frontSku || !rearSku) {
+    if (!id || !yearStart || !yearEnd || !make || !model || !drivetrain) {
+      return data({ ok: false, message: "Missing fields for update." });
+    }
+
+    if (!frontSku && !rearSku && !fullSuspensionSkus) {
       return data({
         ok: false,
-        message: "Missing fields for update.",
+        message: "Add either front/rear SKUs or at least one full suspension SKU.",
       });
     }
 
@@ -346,6 +354,7 @@ export async function action({ request }: ActionFunctionArgs) {
               { key: "drivetrain", value: drivetrain },
               { key: "front_sku", value: frontSku },
               { key: "rear_sku", value: rearSku },
+              { key: "full_suspension_skus", value: fullSuspensionSkus },
             ],
           },
         },
@@ -362,21 +371,13 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
-    return data({
-      ok: true,
-      message: "Fitment updated successfully.",
-    });
+    return data({ ok: true, message: "Fitment updated successfully." });
   }
 
   if (intent === "delete_fitment") {
     const id = String(formData.get("id") || "").trim();
 
-    if (!id) {
-      return data({
-        ok: false,
-        message: "Missing fitment id.",
-      });
-    }
+    if (!id) return data({ ok: false, message: "Missing fitment id." });
 
     const response = await admin.graphql(
       `
@@ -390,9 +391,7 @@ export async function action({ request }: ActionFunctionArgs) {
         }
       }
       `,
-      {
-        variables: { id },
-      },
+      { variables: { id } },
     );
 
     const result = await response.json();
@@ -405,10 +404,7 @@ export async function action({ request }: ActionFunctionArgs) {
       });
     }
 
-    return data({
-      ok: true,
-      message: "Fitment deleted successfully.",
-    });
+    return data({ ok: true, message: "Fitment deleted successfully." });
   }
 
   return data({ ok: false, message: "Unknown action." });
@@ -424,9 +420,7 @@ export default function AirBuilderFitmentsPage() {
     }>;
   };
 
-  const actionData = useActionData() as
-    | { ok: boolean; message: string }
-    | undefined;
+  const actionData = useActionData() as { ok: boolean; message: string } | undefined;
 
   const [search, setSearch] = useState("");
   const [makeFilter, setMakeFilter] = useState("");
@@ -449,6 +443,7 @@ export default function AirBuilderFitmentsPage() {
       const drivetrain = (fitment.fields.drivetrain || "").toLowerCase();
       const frontSku = (fitment.fields.front_sku || "").toLowerCase();
       const rearSku = (fitment.fields.rear_sku || "").toLowerCase();
+      const fullSuspensionSkus = (fitment.fields.full_suspension_skus || "").toLowerCase();
       const years = `${fitment.fields.year_start || ""} ${fitment.fields.year_end || ""}`.toLowerCase();
 
       const matchesSearch =
@@ -458,6 +453,7 @@ export default function AirBuilderFitmentsPage() {
         drivetrain.includes(q) ||
         frontSku.includes(q) ||
         rearSku.includes(q) ||
+        fullSuspensionSkus.includes(q) ||
         years.includes(q);
 
       const matchesMake = !makeFilter || fitment.fields.make === makeFilter;
@@ -471,7 +467,7 @@ export default function AirBuilderFitmentsPage() {
     <div style={{ padding: 24, maxWidth: 1100 }}>
       <h1 style={{ marginBottom: 12 }}>Air Builder Fitments</h1>
       <p style={{ marginBottom: 16 }}>
-        Create, import, edit, delete, and filter front/rear fitment entries for the Air Builder.
+        Create, import, edit, delete, and filter air suspension fitment entries.
       </p>
 
       {actionData ? (
@@ -512,6 +508,7 @@ export default function AirBuilderFitmentsPage() {
               <input name="drivetrain" placeholder="Drivetrain" />
               <input name="frontSku" placeholder="Front SKU" />
               <input name="rearSku" placeholder="Rear SKU" />
+              <textarea name="fullSuspensionSkus" placeholder="Full Suspension SKUs, comma separated or one per line" rows={3} style={{ gridColumn: "1 / -1" }} />
             </div>
             <button type="submit" style={{ padding: "12px 18px", borderRadius: "10px", border: "1px solid #111", background: "#111", color: "#fff", cursor: "pointer", fontWeight: 700 }}>
               Save Fitment
@@ -524,9 +521,9 @@ export default function AirBuilderFitmentsPage() {
             <textarea
               name="csvText"
               rows={10}
-              placeholder={`yearStart,yearEnd,make,model,drivetrain,frontSku,rearSku
-2015,2021,Subaru,STI,AWD,76016,76516
-1989,2000,Lexus,LS400,RWD,76001,76501`}
+              placeholder={`yearStart,yearEnd,make,model,drivetrain,frontSku,rearSku,fullSuspensionSkus
+2015,2021,Volkswagen,GTI,FWD,76003,76503,BR-GTI-MK7-FULLKIT
+2015,2021,Volkswagen,GTI,FWD,76003,76503,MAXLOAD-GTI-MK7-FULLKIT`}
               style={{ width: "100%", padding: 12, borderRadius: 10, marginBottom: 12 }}
             />
             <button type="submit" style={{ padding: "12px 18px", borderRadius: "10px", border: "1px solid #111", background: "#111", color: "#fff", cursor: "pointer", fontWeight: 700 }}>
@@ -538,14 +535,7 @@ export default function AirBuilderFitmentsPage() {
 
       <h2 style={{ marginTop: 24, marginBottom: 12 }}>Current Fitments</h2>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
         <input
           placeholder="Search make, model, drivetrain, year, or SKU"
           value={search}
@@ -555,18 +545,14 @@ export default function AirBuilderFitmentsPage() {
         <select value={makeFilter} onChange={(e) => setMakeFilter(e.target.value)}>
           <option value="">All Makes</option>
           {makes.map((make) => (
-            <option key={make} value={make}>
-              {make}
-            </option>
+            <option key={make} value={make}>{make}</option>
           ))}
         </select>
 
         <select value={drivetrainFilter} onChange={(e) => setDrivetrainFilter(e.target.value)}>
           <option value="">All Drivetrains</option>
           {drivetrains.map((drive) => (
-            <option key={drive} value={drive}>
-              {drive}
-            </option>
+            <option key={drive} value={drive}>{drive}</option>
           ))}
         </select>
       </div>
@@ -593,13 +579,18 @@ export default function AirBuilderFitmentsPage() {
                   <input name="drivetrain" defaultValue={fitment.fields.drivetrain || ""} />
                   <input name="frontSku" defaultValue={fitment.fields.front_sku || ""} />
                   <input name="rearSku" defaultValue={fitment.fields.rear_sku || ""} />
+                  <textarea
+                    name="fullSuspensionSkus"
+                    defaultValue={fitment.fields.full_suspension_skus || ""}
+                    placeholder="Full Suspension SKUs"
+                    rows={3}
+                    style={{ gridColumn: "1 / -1" }}
+                  />
                 </div>
 
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button type="submit" style={{ padding: "10px 14px", borderRadius: "10px", border: "1px solid #111", background: "#111", color: "#fff", cursor: "pointer", fontWeight: 700 }}>
-                    Update
-                  </button>
-                </div>
+                <button type="submit" style={{ padding: "10px 14px", borderRadius: "10px", border: "1px solid #111", background: "#111", color: "#fff", cursor: "pointer", fontWeight: 700 }}>
+                  Update
+                </button>
               </Form>
 
               <Form method="post" style={{ marginTop: 10 }}>
