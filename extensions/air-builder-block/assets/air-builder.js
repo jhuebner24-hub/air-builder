@@ -815,14 +815,26 @@
     }
 
     function renderManagementStep() {
-      if (rendered.management) return;
-      renderProductsFromCache(getManagementSkus(), managementGridEl, "management");
-      managementGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Management", "Continue without a management system.", "no-management"));
-      setCenteredGridIfNeeded(managementGridEl);
-      bindManagementCards();
-      updateManagementSummary();
-      rendered.management = true;
-    }
+  if (rendered.management) return;
+
+  const managementSkus = [
+    "27680",
+    "27685",
+    "27480",
+    "27485",
+    "BR-PRO-SYS-14",
+    "BR-PRO-SYS-38"
+  ];
+
+  console.log("MANAGEMENT SKUS BEING RENDERED:", managementSkus);
+
+  renderProductsFromCache(managementSkus, managementGridEl, "management");
+  managementGridEl.insertAdjacentHTML("beforeend", buildOptionCard("No Management", "Continue without a management system.", "no-management"));
+  setCenteredGridIfNeeded(managementGridEl);
+  bindManagementCards();
+  updateManagementSummary();
+  rendered.management = true;
+}
 
     function renderTankStep() {
       if (rendered.tank) return;
