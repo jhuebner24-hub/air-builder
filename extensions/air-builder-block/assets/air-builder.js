@@ -96,8 +96,15 @@
     }
 
     function getManagementSkus() {
-      return currentFitment?.managementSkus?.length ? currentFitment.managementSkus : GLOBAL_MANAGEMENT_SKUS;
-    }
+  return [
+    "27680",
+    "27685",
+    "27480",
+    "27485",
+    "BR-PRO-SYS-14",
+    "BR-PRO-SYS-38"
+  ];
+}
 
     function getTankSkus() {
       return currentFitment?.tankSkus?.length ? currentFitment.tankSkus : GLOBAL_TANK_SKUS;
