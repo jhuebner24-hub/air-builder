@@ -795,6 +795,7 @@
 
         FITMENTS = Array.isArray(json.fitments) ? json.fitments : [];
 
+        // Disabled so frontend GLOBAL_MANAGEMENT_SKUS controls management options
         // if (json.settings?.managementSkus?.length) GLOBAL_MANAGEMENT_SKUS = json.settings.managementSkus;
         if (json.settings?.tankSkus?.length) GLOBAL_TANK_SKUS = json.settings.tankSkus;
         if (json.settings?.addonSkus?.length) GLOBAL_ADDON_SKUS = json.settings.addonSkus;
