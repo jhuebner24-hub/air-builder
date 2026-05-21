@@ -14,7 +14,7 @@
       addon: false
     };
 
-    let GLOBAL_MANAGEMENT_SKUS = ["27680", "27685", "27480", "27485"];
+    let GLOBAL_MANAGEMENT_SKUS = ["27680", "27685", "27480", "27485", "BR-PRO-SYS-14", "BR-PRO-SYS-38"];
     let GLOBAL_TANK_SKUS = ["27801", "27802", "27803", "27804", "27805", "27806", "27807", "27808", "27762", "27764", "27767", "27769"];
     let GLOBAL_ADDON_SKUS = ["27705", "27703", "27750", "27751"];
 
