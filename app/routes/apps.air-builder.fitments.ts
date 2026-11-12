@@ -1,4 +1,5 @@
 import { authenticate } from "../shopify.server";
+import { loadAllFitments } from "../air-builder-fitments.server";
 
 type FitmentRecord = {
   yearStart: number;
@@ -57,6 +58,7 @@ export async function loader({ request }: any) {
 
   try {
     const { admin } = await authenticate.public.appProxy(request);
+    if (!admin) throw new Error("Shopify did not authorize fitment access.");
 
     const response = await admin.graphql(`
       query AirRideFitments {
@@ -71,21 +73,11 @@ export async function loader({ request }: any) {
             value
           }
         }
-        metaobjects(type: "air_ride_fitment", first: 250) {
-          nodes {
-            id
-            handle
-            fields {
-              key
-              value
-            }
-          }
-        }
       }
     `);
 
     const gql = await response.json();
-    const nodes = gql?.data?.metaobjects?.nodes || [];
+    const nodes = await loadAllFitments(admin.graphql);
     const shop = gql?.data?.shop || {};
 
     const settings = {

@@ -1,6 +1,7 @@
 import { Form, useActionData, useLoaderData, data } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
+import { loadAllFitments } from "../air-builder-fitments.server";
 import { useMemo, useState } from "react";
 
 function fieldValueMap(fields: Array<{ key: string; value: string | null }>) {
@@ -54,24 +55,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
           name
         }
       }
-      metaobjects(type: "air_ride_fitment", first: 250) {
-        nodes {
-          id
-          handle
-          fields {
-            key
-            value
-          }
-        }
-      }
     }
   `);
 
   const jsonData = await response.json();
   const definitions = jsonData?.data?.metaobjectDefinitions?.nodes || [];
-  const fitments = jsonData?.data?.metaobjects?.nodes || [];
-
   const hasDefinition = definitions.some((d: any) => d.type === "air_ride_fitment");
+  const fitments = hasDefinition ? await loadAllFitments(admin.graphql) : [];
 
   return data({
     hasDefinition,
